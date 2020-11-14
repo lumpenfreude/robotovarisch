@@ -1,5 +1,4 @@
-    ./config.yaml
-    ./store/
-    ./store/*
-    ./robotovarisch/__pycache__
-    ./bot.log
+*.log
+config.yaml
+store/
+__pycache__/
