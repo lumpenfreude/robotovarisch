@@ -10,7 +10,7 @@ class Event(object):
          self.event = event
 
     async def process(self):
-        if self.event.membership == "join" and prev_membership != "join":
+        if self.event.membership == "join" and self.event.prev_membership != "join":
             await self._welcome()
         elif self.event.membership == "ban":
             await self._mock()
