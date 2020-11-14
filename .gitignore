@@ -1,0 +1,5 @@
+    ./config.yaml
+    ./store/
+    ./store/*
+    ./robotovarisch/__pycache__
+    ./bot.log

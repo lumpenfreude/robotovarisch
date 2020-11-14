@@ -1,0 +1,136 @@
+2020-11-10 20:40:08,785 | robotovarisch.storage [INFO] Performing initial database setup...
+2020-11-10 20:40:08,794 | robotovarisch.storage [INFO] Database setup complete
+2020-11-10 20:40:08,794 | robotovarisch.storage [INFO] Database initialization of type 'postgres' complete
+2020-11-10 20:40:09,390 | robotovarisch.main [INFO] Logged in as @robo-tovarisch:nopasaran.gq
+2020-11-10 20:40:09,859 | robotovarisch.callbacks [ERROR] Error joining room !rVigvdxHKDUGZDTUcz:matrix.org (attempt 0): Not an active room on this server
+2020-11-10 20:40:09,925 | robotovarisch.callbacks [ERROR] Error joining room !rVigvdxHKDUGZDTUcz:matrix.org (attempt 1): Not an active room on this server
+2020-11-10 20:40:10,044 | robotovarisch.callbacks [ERROR] Error joining room !rVigvdxHKDUGZDTUcz:matrix.org (attempt 2): Not an active room on this server
+2020-11-10 20:40:10,044 | robotovarisch.callbacks [ERROR] Unable to join room: !rVigvdxHKDUGZDTUcz:matrix.org
+2020-11-10 20:40:10,045 | robotovarisch.callbacks [INFO] Joined !rVigvdxHKDUGZDTUcz:matrix.org
+2020-11-10 20:40:10,053 | robotovarisch.callbacks [ERROR] Error joining room !rVigvdxHKDUGZDTUcz:matrix.org (attempt 0): Too Many Requests
+2020-11-10 20:40:10,061 | robotovarisch.callbacks [ERROR] Error joining room !rVigvdxHKDUGZDTUcz:matrix.org (attempt 1): Too Many Requests
+2020-11-10 20:40:10,067 | robotovarisch.callbacks [ERROR] Error joining room !rVigvdxHKDUGZDTUcz:matrix.org (attempt 2): Too Many Requests
+2020-11-10 20:40:10,067 | robotovarisch.callbacks [ERROR] Unable to join room: !rVigvdxHKDUGZDTUcz:matrix.org
+2020-11-10 20:40:10,067 | robotovarisch.callbacks [INFO] Joined !rVigvdxHKDUGZDTUcz:matrix.org
+2020-11-10 20:41:47,226 | robotovarisch.callbacks [INFO] Joined !ufFTdzTmJSULbRkvvH:nopasaran.gq
+2020-11-10 20:41:47,274 | robotovarisch.callbacks [INFO] Joined !ufFTdzTmJSULbRkvvH:nopasaran.gq
+2020-11-10 21:11:37,825 | robotovarisch.storage [INFO] Database initialization of type 'postgres' complete
+2020-11-10 21:11:38,304 | robotovarisch.main [INFO] Logged in as @robo-tovarisch:nopasaran.gq
+2020-11-10 21:14:04,025 | robotovarisch.storage [INFO] Database initialization of type 'postgres' complete
+2020-11-10 21:14:04,577 | robotovarisch.main [INFO] Logged in as @robo-tovarisch:nopasaran.gq
+2020-11-10 21:14:31,401 | robotovarisch.storage [INFO] Database initialization of type 'postgres' complete
+2020-11-10 21:14:31,955 | robotovarisch.main [INFO] Logged in as @robo-tovarisch:nopasaran.gq
+2020-11-10 21:15:36,129 | robotovarisch.storage [INFO] Database initialization of type 'postgres' complete
+2020-11-10 21:15:36,694 | robotovarisch.main [INFO] Logged in as @robo-tovarisch:nopasaran.gq
+2020-11-10 21:16:09,318 | robotovarisch.storage [INFO] Database initialization of type 'postgres' complete
+2020-11-10 21:16:09,899 | robotovarisch.main [INFO] Logged in as @robo-tovarisch:nopasaran.gq
+2020-11-10 21:33:53,278 | robotovarisch.storage [INFO] Database initialization of type 'postgres' complete
+2020-11-10 21:33:53,741 | robotovarisch.main [INFO] Logged in as @robo-tovarisch:nopasaran.gq
+2020-11-10 21:40:53,017 | robotovarisch.storage [INFO] Database initialization of type 'postgres' complete
+2020-11-10 21:40:53,564 | robotovarisch.main [INFO] Logged in as @robo-tovarisch:nopasaran.gq
+2020-11-10 22:52:51,939 | robotovarisch.storage [INFO] Database initialization of type 'postgres' complete
+2020-11-10 22:53:44,622 | robotovarisch.storage [INFO] Database initialization of type 'postgres' complete
+2020-11-10 22:54:19,548 | robotovarisch.storage [INFO] Database initialization of type 'postgres' complete
+2020-11-10 22:54:20,105 | robotovarisch.main [INFO] Logged in as @robo-tovarisch:nopasaran.gq
+2020-11-10 22:57:01,495 | robotovarisch.callbacks [ERROR] it worekd?!
+2020-11-10 23:04:46,053 | robotovarisch.storage [INFO] Database initialization of type 'postgres' complete
+2020-11-10 23:04:46,610 | robotovarisch.main [INFO] Logged in as @robo-tovarisch:nopasaran.gq
+2020-11-10 23:05:38,727 | robotovarisch.callbacks [ERROR] this fuckin worked too NAILED IT
+2020-11-10 23:09:23,041 | robotovarisch.callbacks [ERROR] this fuckin worked too NAILED IT
+2020-11-10 23:13:00,369 | robotovarisch.callbacks [INFO] Joined !oEOdBdpRxlnoryMrPi:nopasaran.gq
+2020-11-10 23:13:00,403 | robotovarisch.callbacks [INFO] Joined !oEOdBdpRxlnoryMrPi:nopasaran.gq
+2020-11-10 23:13:00,446 | robotovarisch.callbacks [ERROR] this fuckin worked too NAILED IT
+2020-11-10 23:13:00,447 | robotovarisch.callbacks [ERROR] this fuckin worked too NAILED IT
+2020-11-10 23:13:00,447 | robotovarisch.callbacks [ERROR] this fuckin worked too NAILED IT
+2020-11-10 23:35:14,196 | robotovarisch.storage [INFO] Database initialization of type 'postgres' complete
+2020-11-10 23:35:14,759 | robotovarisch.main [INFO] Logged in as @robo-tovarisch:nopasaran.gq
+2020-11-10 23:35:40,783 | robotovarisch.callbacks [INFO] Joined !SJNGrysuBVJwyaqort:nopasaran.gq
+2020-11-10 23:35:41,683 | robotovarisch.callbacks [INFO] Joined !SJNGrysuBVJwyaqort:nopasaran.gq
+2020-11-10 23:37:10,745 | robotovarisch.storage [INFO] Database initialization of type 'postgres' complete
+2020-11-10 23:37:11,314 | robotovarisch.main [INFO] Logged in as @robo-tovarisch:nopasaran.gq
+2020-11-10 23:37:27,324 | robotovarisch.callbacks [INFO] Joined !SJNGrysuBVJwyaqort:nopasaran.gq
+2020-11-10 23:37:27,377 | robotovarisch.callbacks [INFO] Joined !SJNGrysuBVJwyaqort:nopasaran.gq
+2020-11-10 23:39:49,118 | robotovarisch.storage [INFO] Database initialization of type 'postgres' complete
+2020-11-10 23:39:49,765 | robotovarisch.main [INFO] Logged in as @robo-tovarisch:nopasaran.gq
+2020-11-10 23:39:56,976 | robotovarisch.callbacks [INFO] Joined !SJNGrysuBVJwyaqort:nopasaran.gq
+2020-11-10 23:39:57,016 | robotovarisch.callbacks [INFO] Joined !SJNGrysuBVJwyaqort:nopasaran.gq
+2020-11-11 17:20:57,182 | robotovarisch.storage [INFO] Database initialization of type 'postgres' complete
+2020-11-11 17:20:57,810 | robotovarisch.main [INFO] Logged in as @robo-tovarisch:nopasaran.gq
+2020-11-11 17:21:47,633 | robotovarisch.storage [INFO] Database initialization of type 'postgres' complete
+2020-11-11 17:21:48,318 | robotovarisch.main [INFO] Logged in as @robo-tovarisch:nopasaran.gq
+2020-11-11 17:22:16,071 | robotovarisch.callbacks [INFO] Joined !ufFTdzTmJSULbRkvvH:nopasaran.gq
+2020-11-11 17:22:16,103 | robotovarisch.callbacks [INFO] Joined !ufFTdzTmJSULbRkvvH:nopasaran.gq
+2020-11-11 17:22:51,292 | robotovarisch.callbacks [INFO] Joined !SJNGrysuBVJwyaqort:nopasaran.gq
+2020-11-11 17:22:51,330 | robotovarisch.callbacks [INFO] Joined !SJNGrysuBVJwyaqort:nopasaran.gq
+2020-11-11 17:53:55,801 | robotovarisch.storage [INFO] Database initialization of type 'postgres' complete
+2020-11-11 17:53:56,458 | robotovarisch.main [INFO] Logged in as @robo-tovarisch:nopasaran.gq
+2020-11-11 17:54:49,104 | robotovarisch.storage [INFO] Database initialization of type 'postgres' complete
+2020-11-11 17:54:49,758 | robotovarisch.main [INFO] Logged in as @robo-tovarisch:nopasaran.gq
+2020-11-11 20:58:25,202 | robotovarisch.storage [INFO] Database initialization of type 'postgres' complete
+2020-11-11 20:58:25,877 | robotovarisch.main [INFO] Logged in as @robo-tovarisch:nopasaran.gq
+2020-11-11 20:58:26,562 | robotovarisch.callbacks [INFO] Joined !JEYoVdZbSUatneFpNT:nopasaran.gq
+2020-11-11 20:58:26,656 | robotovarisch.callbacks [INFO] Joined !JEYoVdZbSUatneFpNT:nopasaran.gq
+2020-11-11 21:23:37,852 | robotovarisch.storage [INFO] Database initialization of type 'postgres' complete
+2020-11-11 21:23:38,532 | robotovarisch.main [INFO] Logged in as @robo-tovarisch:nopasaran.gq
+2020-11-11 21:27:14,328 | robotovarisch.storage [INFO] Database initialization of type 'postgres' complete
+2020-11-11 21:27:15,010 | robotovarisch.main [INFO] Logged in as @robo-tovarisch:nopasaran.gq
+2020-11-11 21:53:47,162 | robotovarisch.storage [INFO] Database initialization of type 'postgres' complete
+2020-11-11 21:53:47,918 | robotovarisch.main [INFO] Logged in as @robo-tovarisch:nopasaran.gq
+2020-11-11 21:55:23,821 | robotovarisch.storage [INFO] Database initialization of type 'postgres' complete
+2020-11-11 21:55:24,517 | robotovarisch.main [INFO] Logged in as @robo-tovarisch:nopasaran.gq
+2020-11-11 22:05:05,381 | robotovarisch.storage [INFO] Database initialization of type 'postgres' complete
+2020-11-11 22:05:06,059 | robotovarisch.main [INFO] Logged in as @robo-tovarisch:nopasaran.gq
+2020-11-11 22:07:00,618 | robotovarisch.storage [INFO] Database initialization of type 'postgres' complete
+2020-11-11 22:07:01,292 | robotovarisch.main [INFO] Logged in as @robo-tovarisch:nopasaran.gq
+2020-11-11 23:07:54,244 | robotovarisch.storage [INFO] Database initialization of type 'postgres' complete
+2020-11-11 23:07:54,960 | robotovarisch.main [INFO] Logged in as @robo-tovarisch:nopasaran.gq
+2020-11-12 21:56:55,370 | robotovarisch.storage [INFO] Database initialization of type 'postgres' complete
+2020-11-12 21:56:56,071 | robotovarisch.main [INFO] Logged in as @robo-tovarisch:nopasaran.gq
+2020-11-12 22:11:15,700 | robotovarisch.storage [INFO] Database initialization of type 'postgres' complete
+2020-11-12 22:11:16,383 | robotovarisch.main [INFO] Logged in as @robo-tovarisch:nopasaran.gq
+2020-11-12 23:08:53,549 | robotovarisch.storage [INFO] Database initialization of type 'postgres' complete
+2020-11-12 23:08:54,865 | robotovarisch.main [INFO] Logged in as @robo-tovarisch:nopasaran.gq
+2020-11-12 23:11:34,551 | robotovarisch.storage [INFO] Database initialization of type 'postgres' complete
+2020-11-12 23:11:35,226 | robotovarisch.main [INFO] Logged in as @robo-tovarisch:nopasaran.gq
+2020-11-12 23:13:22,523 | robotovarisch.storage [INFO] Database initialization of type 'postgres' complete
+2020-11-12 23:13:23,258 | robotovarisch.main [INFO] Logged in as @robo-tovarisch:nopasaran.gq
+2020-11-12 23:14:23,003 | robotovarisch.storage [INFO] Database initialization of type 'postgres' complete
+2020-11-12 23:14:23,698 | robotovarisch.main [INFO] Logged in as @robo-tovarisch:nopasaran.gq
+2020-11-12 23:14:55,315 | robotovarisch.storage [INFO] Database initialization of type 'postgres' complete
+2020-11-12 23:14:56,007 | robotovarisch.main [INFO] Logged in as @robo-tovarisch:nopasaran.gq
+2020-11-12 23:28:11,166 | robotovarisch.storage [INFO] Database initialization of type 'postgres' complete
+2020-11-12 23:28:11,854 | robotovarisch.main [INFO] Logged in as @robo-tovarisch:nopasaran.gq
+2020-11-12 23:29:50,520 | robotovarisch.storage [INFO] Database initialization of type 'postgres' complete
+2020-11-12 23:29:51,235 | robotovarisch.main [INFO] Logged in as @robo-tovarisch:nopasaran.gq
+2020-11-13 00:52:42,009 | robotovarisch.storage [INFO] Database initialization of type 'postgres' complete
+2020-11-13 00:52:42,725 | robotovarisch.main [INFO] Logged in as @robo-tovarisch:nopasaran.gq
+2020-11-13 00:59:15,124 | robotovarisch.storage [INFO] Database initialization of type 'postgres' complete
+2020-11-13 00:59:15,824 | robotovarisch.main [INFO] Logged in as @robo-tovarisch:nopasaran.gq
+2020-11-13 01:05:33,645 | robotovarisch.storage [INFO] Database initialization of type 'postgres' complete
+2020-11-13 01:05:34,352 | robotovarisch.main [INFO] Logged in as @robo-tovarisch:nopasaran.gq
+2020-11-13 01:05:59,838 | robotovarisch.storage [INFO] Database initialization of type 'postgres' complete
+2020-11-13 01:06:00,557 | robotovarisch.main [INFO] Logged in as @robo-tovarisch:nopasaran.gq
+2020-11-13 01:08:34,769 | robotovarisch.storage [INFO] Database initialization of type 'postgres' complete
+2020-11-13 01:08:35,486 | robotovarisch.main [INFO] Logged in as @robo-tovarisch:nopasaran.gq
+2020-11-13 01:08:36,045 | robotovarisch.callbacks [INFO] Joined !AzlxHZgkIjcoHBgrvm:matrix.org
+2020-11-13 01:08:36,087 | robotovarisch.callbacks [INFO] Joined !AzlxHZgkIjcoHBgrvm:matrix.org
+2020-11-13 01:11:23,776 | robotovarisch.storage [INFO] Database initialization of type 'postgres' complete
+2020-11-13 01:11:24,327 | robotovarisch.main [INFO] Logged in as @robo-tovarisch:nopasaran.gq
+2020-11-13 21:18:34,916 | robotovarisch.storage [INFO] Database initialization of type 'postgres' complete
+2020-11-13 21:18:35,667 | robotovarisch.main [INFO] Logged in as @robo-tovarisch:nopasaran.gq
+2020-11-13 21:19:48,110 | robotovarisch.storage [INFO] Database initialization of type 'postgres' complete
+2020-11-13 21:19:48,852 | robotovarisch.main [INFO] Logged in as @robo-tovarisch:nopasaran.gq
+2020-11-13 21:22:10,826 | robotovarisch.storage [INFO] Database initialization of type 'postgres' complete
+2020-11-13 21:22:11,372 | robotovarisch.main [INFO] Logged in as @robo-tovarisch:nopasaran.gq
+2020-11-13 21:22:37,028 | robotovarisch.storage [INFO] Database initialization of type 'postgres' complete
+2020-11-13 21:22:37,576 | robotovarisch.main [INFO] Logged in as @robo-tovarisch:nopasaran.gq
+2020-11-13 21:23:12,693 | robotovarisch.storage [INFO] Database initialization of type 'postgres' complete
+2020-11-13 21:23:13,489 | robotovarisch.main [INFO] Logged in as @robo-tovarisch:nopasaran.gq
+2020-11-13 21:25:59,894 | robotovarisch.storage [INFO] Database initialization of type 'postgres' complete
+2020-11-13 21:26:00,625 | robotovarisch.main [INFO] Logged in as @robo-tovarisch:nopasaran.gq
+2020-11-13 21:31:18,893 | robotovarisch.storage [INFO] Database initialization of type 'postgres' complete
+2020-11-13 21:31:19,620 | robotovarisch.main [INFO] Logged in as @robo-tovarisch:nopasaran.gq
+2020-11-13 21:34:28,098 | robotovarisch.storage [INFO] Database initialization of type 'postgres' complete
+2020-11-13 21:34:28,809 | robotovarisch.main [INFO] Logged in as @robo-tovarisch:nopasaran.gq
+2020-11-13 21:35:23,335 | robotovarisch.storage [INFO] Database initialization of type 'postgres' complete
+2020-11-13 21:35:24,067 | robotovarisch.main [INFO] Logged in as @robo-tovarisch:nopasaran.gq
