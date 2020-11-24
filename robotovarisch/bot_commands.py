@@ -140,9 +140,10 @@ class Command(object):
     async def _add_room_info(self) -> Room:
         room_greeting = " ".join(self.args)
         room_rules = "Not implemented yet lol."
+        room_dbid = self.room.room_id
         room = Room(
                 self=self.client,
-                room_dbid=self.room.room_id,
+                room_dbid=room_dbid,
                 room_greeting=room_greeting,
                 room_rules=room_rules,
                 is_listed=False,

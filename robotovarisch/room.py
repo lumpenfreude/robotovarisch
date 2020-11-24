@@ -23,7 +23,7 @@ class Room(object):
         is_listed: bool,
     ):
         self.client = client
-        self.room_dbid = room_dbid
-        self.room_greeting = room_greeting
-        self.room_rules = room_rules
-        self.is_listed = is_listed
+        room_dbid = room_dbid
+        room_greeting = room_greeting
+        room_rules = room_rules
+        is_listed = is_listed
