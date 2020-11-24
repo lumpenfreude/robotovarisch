@@ -70,8 +70,9 @@ class Callbacks(object):
     async def roommember(self, room, event):
         if event.sender == self.client.user:
             return
-        event = Event(self.client, self.store, self.config, event.content, room, event)
-        await event.process()
+        if event.membership == "join" and event.prev_membership != "join":
+            event = Event(self.client, self.store, self.config, event.content, room, event)
+            await event.process()
 
     async def invite(self, room, event):
         logger.debug(f"Got invite to {room.room_id} from {event.sender}.")

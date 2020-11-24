@@ -1,4 +1,5 @@
 import logging
+from robotovarisch.room import Room
 
 # The latest migration version of the database.
 #
@@ -7,6 +8,7 @@ import logging
 # the version specified here.
 #
 # When a migration is performed, the `migration_version` table should be incremented.
+
 latest_migration_version = 0
 
 logger = logging.getLogger(__name__)
@@ -85,7 +87,16 @@ class Storage(object):
         )
 
         # Set up any other necessary database tables here
-
+        self._execute(
+            """
+            CREATE TABLE room (
+            room_dbid TEXT,
+            room_greeting TEXT,
+            room_rules TEXT,
+            is_listed BOOL NOT NULL
+            )
+            """,
+        )
         logger.info("Database setup complete")
 
     def _run_migrations(self, current_migration_version: int):
@@ -98,15 +109,48 @@ class Storage(object):
         """
         logger.debug("Checking for necessary database migrations...")
 
-        # if current_migration_version < 1:
-        #    logger.info("Migrating the database from v0 to v1...")
-        #
-        #    # Add new table, delete old ones, etc.
-        #
-        #    # Update the stored migration version
-        #    self._execute("UPDATE migration_version SET version = 1")
-        #
-        #    logger.info("Database migrated to v1")
+        if current_migration_version < 1:
+            logger.info("Migrating the database from v0 to v1...")
+
+            self._execute("ALTER TABLE room RENAME to room_temp")
+
+            self._execute(
+                """
+                CREATE TABLE room (
+                    room_dbid TEXT,
+                    room_greeting TEXT,
+                    room_rules TEXT,
+                    is_listed BOOL
+                )
+            """
+            )
+
+            self._execute(
+                """
+                INSERT INTO room (
+                    room_dbid,
+                    room_greeting,
+                    room_rules,
+                    is_listed
+                )
+                SELECT
+                    room_dbid,
+                    room_greeting,
+                    room_rules,
+                    is_listed
+                FROM room_temp;
+            """
+            )
+
+            self._execute(
+                """
+                DROP table room_temp
+            """
+            )
+            # Update the stored migration version
+            self._execute("UPDATE migration_version SET version = 1")
+
+            logger.info("Database migrated to v1")
 
     def _execute(self, *args):
         """A wrapper around cursor.execute that transforms placeholder ?'s to %s for postgres
@@ -116,54 +160,52 @@ class Storage(object):
         else:
             self.cursor.execute(*args)
 
-#    def load_roomdata(self) -> Dict[Tuple][str, str], RoomCommand]:
-#        self._execute(
-#                """
-#                SELECT
-#                    room_name,
-#                    room_description,
-#                    room_affiliation
-#                FROM rooms
-#        """
-#        )
-#        rows = self.cursor.fetchall()
-#        rooms = {}
-#        
-#        for row in rows:
-#            room_name = row[0]
-#            room_description = row[1]
-#            room_affiliation = row[2]
-#
-#            rooms[(room_id)] = RoomCommand(
-#                    client=self.client,
-#                    store=self,
-#                    room_name=room_name,
-#                    room_description=room_description,
-#                    room_affiliation=room_affiliation,
-#                    )
-#
-#    def store_roomdata(self, room_command: RoomCommand):
-#        #store a new room
-#        self._execute(
-#                """
-#                INSERT INTO rooms (
-#                    room_name,
-#                    room_description,
-#                    room_affiliation
-#                ) VALUES (
-#                    ?,?,?
-#                )
-#                """,
-#                (
-#                    room_command.room_name,
-#                    room_command.room_description,
-#                    room_command.room_affiliation,
-#                ),
-#            )
-#    def delete_roomdata(self, room_name: str):
-#        self._execute(
-#                """
-#                DELETE FROM rooms WHERE room_name = ?
-#            """,
-#                (room_name),
-#                )
+    def load_room_data(self, room_id: str) -> Room:
+        rows = self.cursor.fetchall()
+        logger.info("Loaded room information")
+        room = {}
+
+        for row in rows:
+            room_dbid = row[0]
+            room_greeting = row[1]
+            room_rules = row[2]
+            is_listed = row[3]
+            if room_dbid == room_id:
+                room[(room_dbid, room_greeting, room_rules, is_listed)] = Room(
+                        client=self.client,
+                        store=self,
+                        room_dbid=room_dbid,
+                        room_greeting=room_greeting,
+                        room_rules=room_rules,
+                        is_listed=is_listed,
+                        )
+                return room
+
+    def store_room_data(self, room: Room):
+        self._execute(
+            """
+            INSERT INTO room (
+                room_dbid,
+                room_greeting,
+                room_rules,
+                is_listed
+            ) VALUES (
+                ?,?,?,?
+            )
+        """,
+            (
+                room.room_dbid,
+                room.room_greeting,
+                room.room_rules,
+                room.is_listed,
+            ),
+        )
+
+    def delete_room_info(self, room_id: str):
+        self._execute(
+            """
+            DELETE FROM room WHERE room_dbid = ?
+
+            """,
+            (room_id)
+            )

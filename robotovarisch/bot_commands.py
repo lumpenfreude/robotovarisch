@@ -1,8 +1,11 @@
 from robotovarisch.chat_functions import send_text_to_room, send_junk_to_room, change_avatar, change_displayname
+from robotovarisch.storage import Storage
+from robotovarisch.room import Room
+
 
 class Command(object):
     def __init__(self, client, store, config, command, room, event):
-        self.client = client 
+        self.client = client
         self.store = store
         self.config = config
         self.command = command
@@ -19,29 +22,33 @@ class Command(object):
             await self._show_help()
         elif self.command.startswith("bonk"):
             await self._bonk()
-        elif self.command.startswith("intro"):
-            await self._introduction()
         elif self.command.startswith("status"):
             await self._status()
         elif self.command.startswith("comfort"):
             await self._comfort()
-        elif self.command.startswith("fuckinavatar"):
+        elif self.command.startswith("avatar"):
             await self._avatar()
-        elif self.command.startswith("fuckinnick"):
+        elif self.command.startswith("nick"):
             await self._nick()
+        elif self.command.startswith("addroomgreet"):
+            await self._add_room_info()
+        elif self.command.startswith("delroomgreet"):
+            await self._del_room_info()
         else:
             await self._unknown_command()
 
     async def _nick(self):
-        nick = " ".join(self.args)
-        await change_displayname(self.client, nick)
+        if self.event.sender == "@elen:nopasaran.gq":
+            nick = " ".join(self.args)
+            await change_displayname(self.client, nick)
 
     async def _avatar(self):
-        mxid = self.args[0]
-        if len(mxid) > 6 and mxid[0:6] == "mxc://":
-            await change_avatar(self.client, mxid)
-        else:
-            await send_text_to_room(self.client, self.room.room_id, "that's not an mxc url")
+        if self.event.sender == "@elen:nopasaran.gq":
+            mxid = self.args[0]
+            if len(mxid) > 6 and mxid[0:6] == "mxc://":
+                await change_avatar(self.client, mxid)
+            else:
+                await send_text_to_room(self.client, self.room.room_id, "that's not an mxc url")
 
     async def _list_rooms(self):
         # this is where i am gonna have to add in the interactive room storage stuff... to come
@@ -56,10 +63,10 @@ class Command(object):
                "<b>REGIONAL</b><br>"
                "- #wiscomrades:nopasaran.gq - wisconsin general<br>"
                "    - #mkecdc:nopasaran.gq - milwaukee community defense coalition<br>"
-               "- #freecascadia:nopasaran.gq - cascadia region general"
+               "- #freecascadiageneral:nopasaran.gq - cascadia region general"
                 )
         await send_text_to_room(self.client, self.room.room_id, response)
-        
+
     async def _echo(self):
         response = " ".join(self.args)
         await send_text_to_room(self.client, self.room.room_id, response)
@@ -130,12 +137,21 @@ class Command(object):
             text = "I'm sorry, I don't have information for that person. Please try again."
         await send_text_to_room(self.client, self.room.room_id, text)
 
-    async def _introduction(self):
-        await send_text_to_room(
-                self.client,
-                self.room.room_id,
-                f"**Welcome to No Pasaran,** an anti-fascist secure comms server. Thing. This is the main chat, it is an offshoot of The Rifle Social Facebook group. There is also #trs:nopasaran.gq for weapons discussion, #politicsdeathzone:nopasaran.gq for political discussion, and #support:nopasaran.gq for tech support issues. There are numerous other groups, localblhafdafpaefbealorem ipsem sucj my balls.",
+    async def _add_room_info(self) -> Room:
+        room_greeting = " ".join(self.args)
+        room_rules = "Not implemented yet lol."
+        room = Room(
+                self=self.client,
+                room_dbid=self.room.room_id,
+                room_greeting=room_greeting,
+                room_rules=room_rules,
+                is_listed=False,
                 )
+        await store_room_data(self, room)
+
+    async def _del_room_info(self):
+        await delete_room_data(self, self.room.room_id)
+
     async def _unknown_command(self):
         await send_text_to_room(
             self.client,
