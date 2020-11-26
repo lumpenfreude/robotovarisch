@@ -1,7 +1,6 @@
 import logging
 
 from dataclasses import dataclass
-from robotovarisch.chat_functions import send_text_to_room
 from nio import AsyncClient
 
 
@@ -173,14 +172,25 @@ class Storage(object):
         else:
             self.cursor.execute(*args)
 
-    async def load_room_greeting(self, room_id: str) -> str:
+    def load_room_data(self) -> Dbroom:
         self._execute("SELECT * FROM room")
-        row = self.cursor.fetchone()
 
-        while row is not None:
-            if row[0] == room_id:
-                room_greeting = row[1]
-                await send_text_to_room(self.client, room_id, room_greeting)
+        rows = self.cursor.fetchall()
+        rooms = {}
+
+        for row in rows:
+            room_dbid = row[0]
+            room_greeting = row[1]
+            room_rules = row[2]
+            is_listed = row[3]
+
+            rooms[(room_dbid), (room_greeting), (room_rules), (is_listed)] = Dbroom(
+                    room_dbid=room_dbid,
+                    room_greeting=room_greeting,
+                    room_rules=room_rules,
+                    is_listed=is_listed
+                    )
+            return rooms
 
     async def store_room_data(self, room: Dbroom):
         self._execute(
