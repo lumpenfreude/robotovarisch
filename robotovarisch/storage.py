@@ -103,7 +103,7 @@ class Storage(object):
         self._execute(
             """
             CREATE TABLE room (
-            room_dbid TEXT NOT NULL PRIMARY KEY,
+            room_dbid TEXT NOT NULL,
             room_greeting TEXT,
             room_rules TEXT,
             is_listed BOOL NOT NULL
@@ -130,7 +130,7 @@ class Storage(object):
             self._execute(
                 """
                 CREATE TABLE room (
-                    room_dbid TEXT NOT NULL PRIMARY KEY,
+                    room_dbid TEXT NOT NULL,
                     room_greeting TEXT,
                     room_rules TEXT,
                     is_listed BOOL NOT NULL
@@ -174,10 +174,13 @@ class Storage(object):
             self.cursor.execute(*args)
 
     async def load_room_greeting(self, room_id: str) -> str:
-        self._execute("SELECT room_greeting FROM room WHERE room_dbid=%s", (room_id))
+        self._execute("SELECT * FROM room")
         row = self.cursor.fetchone()
-        room_greeting = row['room_greeting']
-        await send_text_to_room(self.client, room_id, room_greeting)
+
+        while row is not None:
+            if row[0] == room_id:
+                room_greeting = row[1]
+                await send_text_to_room(self.client, room_id, room_greeting)
 
     async def store_room_data(self, room: Dbroom):
         self._execute(
