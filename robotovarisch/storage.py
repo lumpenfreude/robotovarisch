@@ -112,7 +112,7 @@ class Storage(object):
 
         self._execute(
                 """
-                alter table only room add constraint rooms_list key primary key (room_dbid)
+                alter table only room add constraint rooms_listkey primary key (room_dbid)
                 """,
                 )
 
@@ -154,7 +154,7 @@ class Storage(object):
 
             self.execute(
                     """
-                    alter table only room add constraint rooms_list key primary key (room_dbid)
+                    alter table only room add constraint rooms_listkey primary key (room_dbid)
                     """,
                     )
 
@@ -195,7 +195,7 @@ class Storage(object):
 
             self.execute(
                     """
-                    alter table only room add constraint rooms_list key primary key (room_dbid)
+                    alter table only room add constraint rooms_listkey primary key (room_dbid)
                     """,
                     )
 
@@ -248,7 +248,7 @@ class Storage(object):
         rows = self.cursor.fetchone()
         for row in rows:
             if row[0] == room.room_dbid:
-                self._execute("DELETE FROM ROW WHERE room_dbid = %s", (room.room_id))
+                self.cursor.execute("DELETE FROM ROW WHERE (room_dbid) = %s", (room.room_id))
         self._execute(
             """
             INSERT INTO room (
@@ -268,10 +268,5 @@ class Storage(object):
             ),
         )
 
-        def delete_room_data(self, room_id: str):
-            self._execute(
-                """
-                DELETE FROM room WHERE room_dbid = %s
-                """,
-                (room_id)
-            )
+    def delete_room_data(self, room_id: str):
+        self.cursor.execute("DELETE FROM room WHERE (room_dbid) = %s", (room_id))

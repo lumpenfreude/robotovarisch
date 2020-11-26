@@ -194,7 +194,9 @@ class Command(object):
 
     async def _del_room_info(self):
         if self.event.sender == "@elen:nopasaran.gq":
-            await self.store.delete_room_data(self, self.event.room_id)
+            await self.store.delete_room_data(self.event.room_id)
+        else:
+            await send_text_to_room(self.client, self.room.room_id, "no.diggity")
 
     async def _unknown_command(self):
         await send_text_to_room(
