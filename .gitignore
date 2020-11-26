@@ -5,7 +5,7 @@ bin/
 config.yaml
 include/
 lib/
-lib64/
+lib64
 pyenv.cfg
 share/
 store/
