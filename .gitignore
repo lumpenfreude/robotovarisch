@@ -1,4 +1,11 @@
-*.log
-config.yaml
-store/
 __pycache__/
+*.log
+*.swp
+bin/
+config.yaml
+include/
+lib/
+lib64/
+pyenv.cfg
+share/
+store/
