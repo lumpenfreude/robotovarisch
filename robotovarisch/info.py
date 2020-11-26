@@ -1,4 +1,7 @@
+import logging
+
 from robotovarisch.chat_functions import send_text_to_room
+logger = logging.getLogger(__name__)
 
 
 class Info(object):
@@ -12,7 +15,9 @@ class Info(object):
 
     async def welcome(self):
         curr_room = self.room.room_id
-        rooms = self.store.load_room_data()
-        for room in rooms:
-            if room.room_dbid == curr_room:
-                await send_text_to_room(self.client, self.room.room_id, room.room_greeting)
+        dbrooms = self.store.load_room_data()
+        for dbroom in dbrooms:
+            if curr_room == dbroom[0]:
+                logger.info(f"{dbroom[0]} vs {curr_room}, greeting is {dbroom[1]}")
+
+                await send_text_to_room(self.client, self.room.room_id, dbroom[1])

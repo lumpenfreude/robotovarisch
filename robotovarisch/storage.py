@@ -176,7 +176,7 @@ class Storage(object):
         self._execute("SELECT * FROM room")
 
         rows = self.cursor.fetchall()
-        rooms = {}
+        dbrooms = {}
 
         for row in rows:
             room_dbid = row[0]
@@ -184,13 +184,13 @@ class Storage(object):
             room_rules = row[2]
             is_listed = row[3]
 
-            rooms[(room_dbid), (room_greeting), (room_rules), (is_listed)] = Dbroom(
+            dbrooms[(room_dbid), (room_greeting), (room_rules), (is_listed)] = Dbroom(
                     room_dbid=room_dbid,
                     room_greeting=room_greeting,
                     room_rules=room_rules,
                     is_listed=is_listed
                     )
-            return rooms
+            return dbrooms
 
     async def store_room_data(self, room: Dbroom):
         self._execute(
