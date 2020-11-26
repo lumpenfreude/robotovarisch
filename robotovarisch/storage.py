@@ -1,5 +1,9 @@
 import logging
-from robotovarisch.room import Room
+
+from dataclasses import dataclass
+from robotovarisch.chat_functions import send_text_to_room
+from nio import AsyncClient
+
 
 # The latest migration version of the database.
 #
@@ -14,8 +18,16 @@ latest_migration_version = 0
 logger = logging.getLogger(__name__)
 
 
+@dataclass
+class Dbroom:
+    room_dbid: str
+    room_greeting: str = "Blank?"
+    room_rules: str = "Not Implemented Yet."
+    is_listed: bool = False
+
+
 class Storage(object):
-    def __init__(self, database_config):
+    def __init__(self, client: AsyncClient, database_config):
         """Setup the database
 
         Runs an initial setup or migrations depending on whether a database file has already
@@ -27,6 +39,7 @@ class Storage(object):
                 * connection_string: A string, featuring a connection string that
                     be fed to each respective db library's `connect` method
         """
+        self.client = client
         self.conn = self._get_database_connection(
             database_config["type"], database_config["connection_string"]
         )
@@ -81,7 +94,7 @@ class Storage(object):
             """
             INSERT INTO migration_version (
                 version
-            ) VALUES (?)
+            ) VALUES (%s)
         """,
             (0,),
         )
@@ -90,7 +103,7 @@ class Storage(object):
         self._execute(
             """
             CREATE TABLE room (
-            room_dbid TEXT,
+            room_dbid TEXT NOT NULL PRIMARY KEY,
             room_greeting TEXT,
             room_rules TEXT,
             is_listed BOOL NOT NULL
@@ -117,10 +130,10 @@ class Storage(object):
             self._execute(
                 """
                 CREATE TABLE room (
-                    room_dbid TEXT,
+                    room_dbid TEXT NOT NULL PRIMARY KEY,
                     room_greeting TEXT,
                     room_rules TEXT,
-                    is_listed BOOL
+                    is_listed BOOL NOT NULL
                 )
             """
             )
@@ -160,28 +173,13 @@ class Storage(object):
         else:
             self.cursor.execute(*args)
 
-    def load_room_data(self, room_id: str) -> Room:
-        rows = self.cursor.fetchall()
-        logger.info("Loaded room information")
-        room = {}
+    async def load_room_greeting(self, room_id: str) -> str:
+        self._execute("SELECT room_greeting FROM room WHERE room_dbid=%s", (room_id))
+        row = self.cursor.fetchone()
+        room_greeting = row['room_greeting']
+        await send_text_to_room(self.client, room_id, room_greeting)
 
-        for row in rows:
-            room_dbid = row[0]
-            room_greeting = row[1]
-            room_rules = row[2]
-            is_listed = row[3]
-            if room_dbid == room_id:
-                room[(room_dbid, room_greeting, room_rules, is_listed)] = Room(
-                        client=self.client,
-                        store=self,
-                        room_dbid=room_dbid,
-                        room_greeting=room_greeting,
-                        room_rules=room_rules,
-                        is_listed=is_listed,
-                        )
-                return room
-
-    def store_room_data(self, room: Room):
+    async def store_room_data(self, room: Dbroom):
         self._execute(
             """
             INSERT INTO room (
@@ -190,7 +188,7 @@ class Storage(object):
                 room_rules,
                 is_listed
             ) VALUES (
-                ?,?,?,?
+                %s,%s,%s,%s
             )
         """,
             (
@@ -201,10 +199,10 @@ class Storage(object):
             ),
         )
 
-    def delete_room_info(self, room_id: str):
+    async def delete_room_info(self, room_id: str):
         self._execute(
             """
-            DELETE FROM room WHERE room_dbid = ?
+            DELETE FROM room WHERE room_dbid = %s
 
             """,
             (room_id)

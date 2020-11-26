@@ -1,4 +1,4 @@
-#/usr/bin/env python3
+#!/usr/bin/env python3
 import asyncio
 import logging
 import sys
@@ -9,7 +9,6 @@ from nio import (
     AsyncClient,
     AsyncClientConfig,
     InviteMemberEvent,
-    HttpClient,
     LocalProtocolError,
     LoginError,
     RoomMessageText,
@@ -33,9 +32,6 @@ async def main():
         config_path = "config.yaml"
     config = Config(config_path)
 
-    # Configure the database
-    store = Storage(config.database)
-
     # Configuration options for the AsyncClient
     client_config = AsyncClientConfig(
         max_limit_exceeded=0,
@@ -52,6 +48,8 @@ async def main():
         store_path=config.store_path,
         config=client_config,
     )
+
+    store = Storage(client, config.database)
 
     # Set up event callbacks
     callbacks = Callbacks(client, store, config)

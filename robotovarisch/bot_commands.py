@@ -1,6 +1,5 @@
 from robotovarisch.chat_functions import send_text_to_room, send_junk_to_room, change_avatar, change_displayname
-from robotovarisch.storage import Storage
-from robotovarisch.room import Room
+from robotovarisch.storage import Dbroom
 
 
 class Command(object):
@@ -137,21 +136,20 @@ class Command(object):
             text = "I'm sorry, I don't have information for that person. Please try again."
         await send_text_to_room(self.client, self.room.room_id, text)
 
-    async def _add_room_info(self) -> Room:
+    async def _add_room_info(self) -> Dbroom:
         room_greeting = " ".join(self.args)
         room_rules = "Not implemented yet lol."
-        room_dbid = self.room.room_id
-        room = Room(
-                self=self.client,
+        room_dbid = self.event.room_id
+        dbroom = Dbroom(
                 room_dbid=room_dbid,
                 room_greeting=room_greeting,
                 room_rules=room_rules,
                 is_listed=False,
                 )
-        await store_room_data(self, room)
+        await self.store.store_room_data(dbroom)
 
     async def _del_room_info(self):
-        await delete_room_data(self, self.room.room_id)
+        await self.store.delete_room_data(self, self.event.room_id)
 
     async def _unknown_command(self):
         await send_text_to_room(

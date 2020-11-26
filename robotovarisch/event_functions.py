@@ -1,7 +1,3 @@
-from robotovarisch.chat_functions import send_text_to_room
-from robotovarisch.storage import Storage
-
-
 class Event(object):
     def __init__(self, client, store, config, content, room, event):
         self.client = client
@@ -16,5 +12,5 @@ class Event(object):
             await self._welcome()
 
     async def _welcome(self):
-        room = self.load_room_data(self.event.room_id)
-        await send_text_to_room(self.client, self.room.room_id, room.room_greeting)
+        curr_room = self.room.room_id
+        await self.store.load_room_data(curr_room)

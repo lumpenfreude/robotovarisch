@@ -1,12 +1,9 @@
 import logging
 
-from nio import JoinError
 
 from robotovarisch.bot_commands import Command
 from robotovarisch.message_responses import Message
-from robotovarisch.event_functions import Event
 from robotovarisch.inv_routine import Invitation
-from robotovarisch.chat_functions import send_text_to_room
 logger = logging.getLogger(__name__)
 
 
@@ -71,8 +68,7 @@ class Callbacks(object):
         if event.sender == self.client.user:
             return
         if event.membership == "join" and event.prev_membership != "join":
-            event = Event(self.client, self.store, self.config, event.content, room, event)
-            await event.process()
+            await self.store.load_room_greeting(room)
 
     async def invite(self, room, event):
         logger.debug(f"Got invite to {room.room_id} from {event.sender}.")
