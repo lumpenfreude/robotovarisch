@@ -109,6 +109,19 @@ class Storage(object):
             )
             """,
         )
+
+        self._execute(
+                """
+                alter table only room add constraint rooms_list key primary key (room_dbid)
+                """,
+                )
+
+        self._execute(
+                """
+                create index listed_rooms on room using btree (is_listed)
+                """,
+                )
+
         logger.info("Database setup complete")
 
     def _run_migrations(self, current_migration_version: int):
@@ -126,33 +139,30 @@ class Storage(object):
 
             self._execute("ALTER TABLE room RENAME to room_temp")
 
-            self._execute(
-                """
-                CREATE TABLE room (
-                    room_dbid TEXT NOT NULL,
-                    room_greeting TEXT,
-                    room_rules TEXT,
-                    is_listed BOOL NOT NULL
-                )
-            """
-            )
+            self._execute("drop index listed_rooms")
 
             self._execute(
                 """
-                INSERT INTO room (
-                    room_dbid,
-                    room_greeting,
-                    room_rules,
-                    is_listed
+                CREATE TABLE room (
+                room_dbid TEXT NOT NULL,
+                room_greeting TEXT,
+                room_rules TEXT,
+                is_listed BOOL NOT NULL
                 )
-                SELECT
-                    room_dbid,
-                    room_greeting,
-                    room_rules,
-                    is_listed
-                FROM room_temp;
-            """
+                """,
             )
+
+            self.execute(
+                    """
+                    alter table only room add constraint rooms_list key primary key (room_dbid)
+                    """,
+                    )
+
+            self._execute(
+                    """
+                    create index listed_rooms on room using btree (is_listed)
+                    """,
+                    )
 
             self._execute(
                 """
@@ -162,7 +172,49 @@ class Storage(object):
             # Update the stored migration version
             self._execute("UPDATE migration_version SET version = 1")
 
-            logger.info("Database migrated to v1")
+            logger.info("Database migrated to 1")
+        if current_migration_version >= 1:
+            new_migration_version = (current_migration_version + 1)
+
+            logger.info(f"Migrating the database from v{current_migration_version} to v{new_migration_version}...")
+
+            self._execute("ALTER TABLE room RENAME to room_temp")
+
+            self._execute("drop index listed_rooms")
+
+            self._execute(
+                """
+                CREATE TABLE room (
+                room_dbid TEXT NOT NULL,
+                room_greeting TEXT,
+                room_rules TEXT,
+                is_listed BOOL NOT NULL
+                )
+                """,
+            )
+
+            self.execute(
+                    """
+                    alter table only room add constraint rooms_list key primary key (room_dbid)
+                    """,
+                    )
+
+            self._execute(
+                    """
+                    create index listed_rooms on room using btree (is_listed)
+                    """,
+                    )
+
+            self._execute(
+                """
+                DROP table room_temp
+            """
+            )
+            # Update the stored migration version
+            self._execute("UPDATE migration_version SET version = %s", (new_migration_version))
+
+            logger.info("Database migrated to {new_migration_version}")
+            current_migration_version = new_migration_version
 
     def _execute(self, *args):
         """A wrapper around cursor.execute that transforms placeholder ?'s to %s for postgres
@@ -174,7 +226,6 @@ class Storage(object):
 
     def load_room_data(self) -> Dbroom:
         self._execute("SELECT * FROM room")
-
         rows = self.cursor.fetchall()
         dbrooms = {}
 
@@ -192,7 +243,12 @@ class Storage(object):
                     )
             return dbrooms
 
-    async def store_room_data(self, room: Dbroom):
+    def store_room_data(self, room: Dbroom):
+        self._execute("SELECT * FROM room")
+        rows = self.cursor.fetchone()
+        for row in rows:
+            if row[0] == room.room_dbid:
+                self._execute("DELETE FROM ROW WHERE room_dbid = %s", (room.room_id))
         self._execute(
             """
             INSERT INTO room (
@@ -212,11 +268,10 @@ class Storage(object):
             ),
         )
 
-    async def delete_room_info(self, room_id: str):
-        self._execute(
-            """
-            DELETE FROM room WHERE room_dbid = %s
-
-            """,
-            (room_id)
+        def delete_room_data(self, room_id: str):
+            self._execute(
+                """
+                DELETE FROM room WHERE room_dbid = %s
+                """,
+                (room_id)
             )

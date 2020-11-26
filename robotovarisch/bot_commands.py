@@ -1,5 +1,8 @@
+import logging
+
 from robotovarisch.chat_functions import send_text_to_room, send_junk_to_room, change_avatar, change_displayname
 from robotovarisch.storage import Dbroom
+logger = logging.getLogger(__name__)
 
 
 class Command(object):
@@ -34,7 +37,7 @@ class Command(object):
         elif self.command.startswith("nick"):
             await self._nick()
         elif self.command.startswith("addroomgreet"):
-            await self._add_room_info()
+            await self._add_room_greeting()
         elif self.command.startswith("delroomgreet"):
             await self._del_room_info()
         elif self.command.startswith("addroomrules"):
@@ -52,7 +55,7 @@ class Command(object):
     async def _avatar(self):
         if self.event.sender == "@elen:nopasaran.gq":
             mxid = self.args[0]
-            if len(mxid) > 6 an d mxid[0:6] == "mxc://":
+            if len(mxid) > 6 and mxid[0:6] == "mxc://":
                 await change_avatar(self.client, mxid)
             else:
                 await send_text_to_room(self.client, self.room.room_id, "that's not an mxc url")
@@ -83,7 +86,6 @@ class Command(object):
 
                 await send_text_to_room(self.client, self.room.room_id, dbroom[1])
 
-    async def _add_rules
     async def _echo(self):
         response = " ".join(self.args)
         await send_text_to_room(self.client, self.room.room_id, response)
@@ -155,42 +157,44 @@ class Command(object):
         await send_text_to_room(self.client, self.room.room_id, text)
 
     async def _add_room_greeting(self) -> Dbroom:
-        curr_room = self.room.room_id
-        dbrooms = self.store.load_room_data()
-        for dbroom in dbrooms:
-            if curr_room == dbroom[0]:
-                room_dbid = self.event.room_id
-                room_greeting = " ".join(self.args)
-                room_rules = dbroom[2]
-                is_listed = dbroom[3]
-                dbroom = Dbroom(
-                    room_dbid=room_dbid,
-                    room_greeting=room_greeting,
-                    room_rules=room_rules,
-                    is_listed=is_listed,
-                )
-        await self.store.store_room_data(dbroom)
+        if self.event.sender == "@elen:nopasaran.gq":
+            curr_room = self.room.room_id
+            dbrooms = self.store.load_room_data()
+            for dbroom in dbrooms:
+                if curr_room == dbroom[0]:
+                    room_dbid = self.event.room_id
+                    room_greeting = " ".join(self.args)
+                    room_rules = dbroom[2]
+                    is_listed = dbroom[3]
+                    dbroom = Dbroom(
+                        room_dbid=room_dbid,
+                        room_greeting=room_greeting,
+                        room_rules=room_rules,
+                        is_listed=is_listed,
+                    )
+            await self.store.store_room_data(dbroom)
 
     async def _add_room_rules(self) -> Dbroom:
-        curr_room = self.room.room_id
-        dbrooms = self.store.load_room_data()
-        for dbroom in dbrooms:
-            if curr_room == dbroom[0]:
-                room_dbid = self.event.room_id
-                room_greeting = dbroom[1]
-                room_rules = " ".join(self.args)
-                is_listed = dbroom[3]
-                dbroom = Dbroom(
-                    room_dbid=room_dbid,
-                    room_greeting=room_greeting,
-                    room_rules=room_rules,
-                    is_listed=is_listed,
-                )
-        await self.store.store_room_data(dbroom)
-
+        if self.event.sender == "@elen:nopasaran.gq":
+            curr_room = self.room.room_id
+            dbrooms = self.store.load_room_data()
+            for dbroom in dbrooms:
+                if curr_room == dbroom[0]:
+                    room_dbid = self.event.room_id
+                    room_greeting = dbroom[1]
+                    room_rules = " ".join(self.args)
+                    is_listed = dbroom[3]
+                    dbroom = Dbroom(
+                        room_dbid=room_dbid,
+                        room_greeting=room_greeting,
+                        room_rules=room_rules,
+                        is_listed=is_listed,
+                    )
+            await self.store.store_room_data(dbroom)
 
     async def _del_room_info(self):
-        await self.store.delete_room_data(self, self.event.room_id)
+        if self.event.sender == "@elen:nopasaran.gq":
+            await self.store.delete_room_data(self, self.event.room_id)
 
     async def _unknown_command(self):
         await send_text_to_room(
