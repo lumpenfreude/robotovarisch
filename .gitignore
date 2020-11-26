@@ -1,5 +1,4 @@
 __pycache__/
-.gitignore
 *.log
 *.swp
 bin/
@@ -7,6 +6,6 @@ config.yaml
 include/
 lib/
 lib64
-pyenv.cfg
+pyvenv.cfg
 share/
 store/
