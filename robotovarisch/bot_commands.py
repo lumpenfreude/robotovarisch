@@ -17,6 +17,10 @@ class Command(object):
             await self._echo()
         elif self.command.startswith("rooms"):
             await self._list_rooms()
+        elif self.command.startswith("rules"):
+            await self._rules()
+        elif self.command.startswith("greeting"):
+            await self._greeting()
         elif self.command.startswith("help"):
             await self._show_help()
         elif self.command.startswith("bonk"):
@@ -33,6 +37,10 @@ class Command(object):
             await self._add_room_info()
         elif self.command.startswith("delroomgreet"):
             await self._del_room_info()
+        elif self.command.startswith("addroomrules"):
+            await self._add_room_rules()
+        elif self.command.startswith("togglepublic"):
+            await self._toggle_public()
         else:
             await self._unknown_command()
 
@@ -44,28 +52,38 @@ class Command(object):
     async def _avatar(self):
         if self.event.sender == "@elen:nopasaran.gq":
             mxid = self.args[0]
-            if len(mxid) > 6 and mxid[0:6] == "mxc://":
+            if len(mxid) > 6 an d mxid[0:6] == "mxc://":
                 await change_avatar(self.client, mxid)
             else:
                 await send_text_to_room(self.client, self.room.room_id, "that's not an mxc url")
 
-    async def _list_rooms(self):
-        # this is where i am gonna have to add in the interactive room storage stuff... to come
-        response = (
-           "<b>THE RIFLE SOCIAL</b><br>"
-               "- #trs:nopasaran.gq - general gun/weapon help<br>"
-               "- #support:nopasaran.gq - tech support<br>"
-               "- #politicsdeathzone:nopasaran.gq - the POLITICS DEATH ZONE<br>"
-               "- #groupwatcher:nopasaran.gq - group watching stuff on rabb.it clones<br>"
-               "<b>THE RED PREPPERS</b><br>"
-               "- #theredpreppers:nopasaran.gq - the red preppers!<br>"
-               "<b>REGIONAL</b><br>"
-               "- #wiscomrades:nopasaran.gq - wisconsin general<br>"
-               "    - #mkecdc:nopasaran.gq - milwaukee community defense coalition<br>"
-               "- #freecascadiageneral:nopasaran.gq - cascadia region general"
-                )
-        await send_text_to_room(self.client, self.room.room_id, response)
+    async def _rules(self):
+        curr_room = self.room.room_id
+        dbrooms = self.store.load_room_data()
+        for dbroom in dbrooms:
+            if curr_room == dbroom[0]:
+                logger.info(f"{dbroom[0]} vs {curr_room}, rules is {dbroom[2]}")
 
+                await send_text_to_room(self.client, self.room.room_id, dbroom[2])
+
+    async def _greeting(self):
+        curr_room = self.room.room_id
+        dbrooms = self.store.load_room_data()
+        for dbroom in dbrooms:
+            if curr_room == dbroom[0]:
+                logger.info(f"{dbroom[0]} vs {curr_room}, greeting is {dbroom[1]}")
+                await send_text_to_room(self.client, self.room.room_id, dbroom[1])
+
+    async def _list_rooms(self):
+        curr_room = self.room.room_id
+        dbrooms = self.store.load_room_data()
+        for dbroom in dbrooms:
+            if curr_room == dbroom[0]:
+                logger.info(f"{dbroom[0]} vs {curr_room}, greeting is {dbroom[1]}")
+
+                await send_text_to_room(self.client, self.room.room_id, dbroom[1])
+
+    async def _add_rules
     async def _echo(self):
         response = " ".join(self.args)
         await send_text_to_room(self.client, self.room.room_id, response)
@@ -136,17 +154,40 @@ class Command(object):
             text = "I'm sorry, I don't have information for that person. Please try again."
         await send_text_to_room(self.client, self.room.room_id, text)
 
-    async def _add_room_info(self) -> Dbroom:
-        room_greeting = " ".join(self.args)
-        room_rules = "Not implemented yet lol."
-        room_dbid = self.event.room_id
-        dbroom = Dbroom(
-                room_dbid=room_dbid,
-                room_greeting=room_greeting,
-                room_rules=room_rules,
-                is_listed=False,
+    async def _add_room_greeting(self) -> Dbroom:
+        curr_room = self.room.room_id
+        dbrooms = self.store.load_room_data()
+        for dbroom in dbrooms:
+            if curr_room == dbroom[0]:
+                room_dbid = self.event.room_id
+                room_greeting = " ".join(self.args)
+                room_rules = dbroom[2]
+                is_listed = dbroom[3]
+                dbroom = Dbroom(
+                    room_dbid=room_dbid,
+                    room_greeting=room_greeting,
+                    room_rules=room_rules,
+                    is_listed=is_listed,
                 )
         await self.store.store_room_data(dbroom)
+
+    async def _add_room_rules(self) -> Dbroom:
+        curr_room = self.room.room_id
+        dbrooms = self.store.load_room_data()
+        for dbroom in dbrooms:
+            if curr_room == dbroom[0]:
+                room_dbid = self.event.room_id
+                room_greeting = dbroom[1]
+                room_rules = " ".join(self.args)
+                is_listed = dbroom[3]
+                dbroom = Dbroom(
+                    room_dbid=room_dbid,
+                    room_greeting=room_greeting,
+                    room_rules=room_rules,
+                    is_listed=is_listed,
+                )
+        await self.store.store_room_data(dbroom)
+
 
     async def _del_room_info(self):
         await self.store.delete_room_data(self, self.event.room_id)
