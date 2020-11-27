@@ -2,7 +2,6 @@ import logging
 
 from dataclasses import dataclass
 from nio import AsyncClient
-from robotovarisch.chat_functions import send_text_to_room
 
 
 latest_migration_version = 0
@@ -233,60 +232,23 @@ class Storage(object):
         else:
             self.cursor.execute(*args)
 
-    async def load_room_greeting(self, curr_room: str):
+    def load_room_info(self, info: str, curr_room: str) -> str:
         try:
-            text = self._execute("SELECT room_greeting FROM room WHERE room_dbid = %s", (curr_room))
-            await send_text_to_room(self.client, curr_room, text)
+            tupled = self._execute("SELECT %s FROM room WHERE room_dbid = %s", (info), (curr_room))
+            text = tupled[0]
+            logger.info(f"{text}")
+            return text
+            # await send_text_to_room(self.client, curr_room, text)
         except Exception:
-            logger.info("no greetng")
+            logger.info("no {info} for {self.room.room_id}")
 
-    def load_room_rules(self, curr_room: str):
+    def store_room_info(self, info: str, update: str):
         try:
-            text = self._execute("SELECT room_rules FROM room WHERE room_dbid = %s", (curr_room))
-            await send_text_to_room(self.client, curr_room, text)
+            self._execute("UPDATE room SET %s = %s WHERE room_dbid = %s", (info), (update), (self.room.room_id))
         except Exception:
-            logger.info("no rules just right")
-
-    def store_room_rules(self, room_rules: str):
-        try:
-            self._execute("UPDATE room SET room_rules = %s", (room_rules))
-        except Exception:
-            logger.info(f"adding room_rules for {self.room.room_id}")
-            self._execute(
-               """
-               INSERT INTO room (
-                   room_dbid,
-                   room_rules,
-               ) VALUES (
-                   %s,%s
-               )
-           """,
-               (
-                   self.room.room_id,
-                   room_rules,
-               ),
-               )
-
-    def store_room_greeting(self, room_greeting: str):
-        try:
-            self._execute("UPDATE room SET room_greeting = %s", (room_greeting))
-            logger.info("successfuly chanfed grrrtz")
-        except Exception:
-            logger.info(f"adding room_greeting for {self.room.room_id}")
-        self._execute(
-              """
-              INSERT INTO room (
-                  room_dbid,
-                  room_greeting
-              ) VALUES (
-                  %s,%s
-              )
-          """,
-              (
-                  self.room.room_id,
-                  room_greeting,
-              ),
-          )
+            logger.info(f"adding {info} for {self.room.room_id}")
+            self._execute("INSERT INTO room (room_dbid) VALUES %s," (self.room.room_id))
+            self._execute("UPDATE room SET %s = %s WHERE room_dbid = %s", (info), (update), (self.room.room_id))
 
     def toggle_room_public(self):
         try:

@@ -1,7 +1,6 @@
 import logging
 
 from robotovarisch.chat_functions import send_text_to_room, send_junk_to_room, change_avatar, change_displayname
-from robotovarisch.storage import Dbroom
 logger = logging.getLogger(__name__)
 
 
@@ -69,24 +68,24 @@ class Command(object):
         await send_text_to_room(self.client, self.room.room_id, response)
 
     async def _greeting(self):
-        text = self.store.get_room_greeting(self.room.room_id)
+        text = self.store.load_room_info("room_greeting", self.room.room_id)
         await send_text_to_room(self.client, self.room.room_id, text)
 
     async def _rules(self):
-        text = self.store.get_room_rules(self.room.room_id)
+        text = self.store.load_room_info("room_rules", self.room.room_id)
         await send_text_to_room(self.client, self.room.room_id, text)
 
     async def _add_room_greeting(self):
         if self.event.sender == "@elen:nopasaran.gq":
             curr_room = self.room.room_id
             text = " ".join(self.args)
-            await self.store.store_room_data(curr_room, text)
+            await self.store.store_room_info(curr_room, "room_greeting", text)
 
     async def _add_room_rules(self):
         if self.event.sender == "@elen:nopasaran.gq":
             curr_room = self.room.room_id
             text = " ".join(self.args)
-            await self.store.store_room_data(curr_room, text)
+            await self.store.store_room_info(curr_room, "room_rules", text)
 
     async def _del_room_info(self):
         if self.event.sender == "@elen:nopasaran.gq":
