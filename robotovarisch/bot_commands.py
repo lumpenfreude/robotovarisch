@@ -68,7 +68,7 @@ class Command(object):
         response = " ".join(self.args)
         await send_text_to_room(self.client, self.room.room_id, response)
 
-        async def _greeting(self):
+    async def _greeting(self):
         text = self.store.get_room_greeting(self.room.room_id)
         await send_text_to_room(self.client, self.room.room_id, text)
 
