@@ -162,12 +162,11 @@ class Command(object):
             dbrooms = self.store.load_room_data()
             for dbroom in dbrooms:
                 if curr_room == dbroom[0]:
-                    room_dbid = self.event.room_id
                     room_greeting = " ".join(self.args)
                     room_rules = dbroom[2]
                     is_listed = dbroom[3]
                     dbroom = Dbroom(
-                        room_dbid=room_dbid,
+                        room_dbid=curr_room,
                         room_greeting=room_greeting,
                         room_rules=room_rules,
                         is_listed=is_listed,
@@ -176,21 +175,22 @@ class Command(object):
 
     async def _add_room_rules(self) -> Dbroom:
         if self.event.sender == "@elen:nopasaran.gq":
+            room_rules = " ".join(self.args)
             curr_room = self.room.room_id
             dbrooms = self.store.load_room_data()
             for dbroom in dbrooms:
                 if curr_room == dbroom[0]:
-                    room_dbid = self.event.room_id
                     room_greeting = dbroom[1]
-                    room_rules = " ".join(self.args)
                     is_listed = dbroom[3]
-                    dbroom = Dbroom(
-                        room_dbid=room_dbid,
-                        room_greeting=room_greeting,
-                        room_rules=room_rules,
-                        is_listed=is_listed,
-                    )
-            await self.store.store_room_data(dbroom)
+                else:
+                    room_greeting = "None yet!"
+                new_dbroom = Dbroom(
+                    room_dbid=room_dbid,
+                    room_greeting=room_greeting,
+                    room_rules=room_rules,
+                    is_listed=is_listed,
+                )
+            await self.store.store_room_data(new_dbroom)
 
     async def _del_room_info(self):
         if self.event.sender == "@elen:nopasaran.gq":

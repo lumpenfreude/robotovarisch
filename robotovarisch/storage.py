@@ -2,15 +2,8 @@ import logging
 
 from dataclasses import dataclass
 from nio import AsyncClient
+from robotovarisch.chat_functions import send_text_to_room
 
-
-# The latest migration version of the database.
-#
-# Database migrations are applied starting from the number specified in the database's
-# `migration_version` table + 1 (or from 0 if this table does not yet exist) up until
-# the version specified here.
-#
-# When a migration is performed, the `migration_version` table should be incremented.
 
 latest_migration_version = 0
 
@@ -20,9 +13,9 @@ logger = logging.getLogger(__name__)
 @dataclass
 class Dbroom:
     room_dbid: str
-    room_greeting: str = "Blank?"
-    room_rules: str = "Not Implemented Yet."
-    is_listed: bool = False
+    room_greeting: str
+    room_rules: str
+    is_listed: bool
 
 
 class Storage(object):
@@ -102,19 +95,13 @@ class Storage(object):
         self._execute(
             """
             CREATE TABLE room (
-            room_dbid TEXT NOT NULL,
+            room_dbid TEXT PRIMARY KEY,
             room_greeting TEXT,
             room_rules TEXT,
             is_listed BOOL NOT NULL
             )
             """,
         )
-
-        self._execute(
-                """
-                alter table only room add constraint rooms_listkey primary key (room_dbid)
-                """,
-                )
 
         self._execute(
                 """
@@ -144,7 +131,7 @@ class Storage(object):
             self._execute(
                 """
                 CREATE TABLE room (
-                room_dbid TEXT NOT NULL,
+                room_dbid TEXT PRIMARY KEY,
                 room_greeting TEXT,
                 room_rules TEXT,
                 is_listed BOOL NOT NULL
@@ -152,11 +139,22 @@ class Storage(object):
                 """,
             )
 
-            self.execute(
-                    """
-                    alter table only room add constraint rooms_listkey primary key (room_dbid)
-                    """,
-                    )
+            self._execute(
+                """
+                INSERT INTO room (
+                    room_dbid,
+                    room_greeting,
+                    room_rules,
+                    is_listed
+                )
+                SELECT FROM room_temp (
+                    room_dbid,
+                    room_greeting,
+                    room_rules,
+                    is_listed
+                )
+                """,
+            )
 
             self._execute(
                     """
@@ -185,7 +183,7 @@ class Storage(object):
             self._execute(
                 """
                 CREATE TABLE room (
-                room_dbid TEXT NOT NULL,
+                room_dbid TEXT PRIMARY KEY,
                 room_greeting TEXT,
                 room_rules TEXT,
                 is_listed BOOL NOT NULL
@@ -193,11 +191,22 @@ class Storage(object):
                 """,
             )
 
-            self.execute(
-                    """
-                    alter table only room add constraint rooms_listkey primary key (room_dbid)
-                    """,
-                    )
+            self._execute(
+                """
+                INSERT INTO room (
+                    room_dbid,
+                    room_greeting,
+                    room_rules,
+                    is_listed
+                )
+                SELECT FROM room_temp (
+                    room_dbid,
+                    room_greeting,
+                    room_rules,
+                    is_listed
+                )
+                """,
+            )
 
             self._execute(
                     """
@@ -224,49 +233,66 @@ class Storage(object):
         else:
             self.cursor.execute(*args)
 
-    def load_room_data(self) -> Dbroom:
-        self._execute("SELECT * FROM room")
-        rows = self.cursor.fetchall()
-        dbrooms = {}
+    def load_room_greeting(self, curr_room: str):
+        try:
+            text = self._execute("SELECT room_greeting FROM room WHERE room_dbid = %s", (curr_room))
+            await send_text_to_room(self.client, curr_room, text)
+        except Exception:
+            logger.info("no greetng")
 
-        for row in rows:
-            room_dbid = row[0]
-            room_greeting = row[1]
-            room_rules = row[2]
-            is_listed = row[3]
+    def load_room_rules(self, curr_room: str):
+        try:
+            text = self._execute("SELECT room_rules FROM room WHERE room_dbid = %s", (curr_room))
+            await send_text_to_room(self.client, curr_room, text)
+        except Exception:
+            logger.info("no rules just right")
 
-            dbrooms[(room_dbid), (room_greeting), (room_rules), (is_listed)] = Dbroom(
-                    room_dbid=room_dbid,
-                    room_greeting=room_greeting,
-                    room_rules=room_rules,
-                    is_listed=is_listed
-                    )
-            return dbrooms
+    def store_room_rules(self, room_rules: str):
+        try:
+            self._execute("UPDATE room SET room_rules = %s", (room_rules))
+        except Exception:
+            logger.info(f"adding room_rules for {self.room.room_id}")
+            self._execute(
+               """
+               INSERT INTO room (
+                   room_dbid,
+                   room_rules,
+               ) VALUES (
+                   %s,%s
+               )
+           """,
+               (
+                   self.room.room_id,
+                   room_rules,
+               ),
+               )
 
-    def store_room_data(self, room: Dbroom):
-        self._execute("SELECT * FROM room")
-        rows = self.cursor.fetchone()
-        for row in rows:
-            if row[0] == room.room_dbid:
-                self.cursor.execute("DELETE FROM ROW WHERE (room_dbid) = %s", (room.room_id))
+    def store_room_greeting(self, room_greeting: str):
+        try:
+            self._execute("UPDATE room SET room_greeting = %s", (room_greeting))
+            logger.info("successfuly chanfed grrrtz")
+        except Exception:
+            logger.info(f"adding room_greeting for {self.room.room_id}")
         self._execute(
-            """
-            INSERT INTO room (
-                room_dbid,
-                room_greeting,
-                room_rules,
-                is_listed
-            ) VALUES (
-                %s,%s,%s,%s
-            )
-        """,
-            (
-                room.room_dbid,
-                room.room_greeting,
-                room.room_rules,
-                room.is_listed,
-            ),
-        )
+              """
+              INSERT INTO room (
+                  room_dbid,
+                  room_greeting
+              ) VALUES (
+                  %s,%s
+              )
+          """,
+              (
+                  self.room.room_id,
+                  room_greeting,
+              ),
+          )
 
-    def delete_room_data(self, room_id: str):
-        self.cursor.execute("DELETE FROM room WHERE (room_dbid) = %s", (room_id))
+    def toggle_room_public(self):
+        try:
+            self._execute("UPDATE room SET is_listed = NOT is_listed WHERE room_dbid = %s", (self.room.room_id))
+        except Exception:
+            logger.info(f"{self.room.room_id} hasnt even been added ")
+
+    def delete_room_data(self, curr_room: str):
+        self.cursor.execute("DELETE FROM room WHERE (room_dbid) = %s", (curr_room))
