@@ -60,35 +60,46 @@ class Command(object):
             else:
                 await send_text_to_room(self.client, self.room.room_id, "that's not an mxc url")
 
-    async def _rules(self):
-        curr_room = self.room.room_id
-        dbrooms = self.store.load_room_data()
-        for dbroom in dbrooms:
-            if curr_room == dbroom[0]:
-                logger.info(f"{dbroom[0]} vs {curr_room}, rules is {dbroom[2]}")
-
-                await send_text_to_room(self.client, self.room.room_id, dbroom[2])
-
-    async def _greeting(self):
-        curr_room = self.room.room_id
-        dbrooms = self.store.load_room_data()
-        for dbroom in dbrooms:
-            if curr_room == dbroom[0]:
-                logger.info(f"{dbroom[0]} vs {curr_room}, greeting is {dbroom[1]}")
-                await send_text_to_room(self.client, self.room.room_id, dbroom[1])
-
     async def _list_rooms(self):
-        curr_room = self.room.room_id
-        dbrooms = self.store.load_room_data()
-        for dbroom in dbrooms:
-            if curr_room == dbroom[0]:
-                logger.info(f"{dbroom[0]} vs {curr_room}, greeting is {dbroom[1]}")
-
-                await send_text_to_room(self.client, self.room.room_id, dbroom[1])
+        text = "alad awaiting implemebtation lol holy fucj typijg wuthiut autocorrect is hard i think i meed a sialing wand"
+        await send_text_to_room(self.client, self.room.room_id, text)
 
     async def _echo(self):
         response = " ".join(self.args)
         await send_text_to_room(self.client, self.room.room_id, response)
+
+        async def _greeting(self):
+        text = self.store.get_room_greeting(self.room.room_id)
+        await send_text_to_room(self.client, self.room.room_id, text)
+
+    async def _rules(self):
+        text = self.store.get_room_rules(self.room.room_id)
+        await send_text_to_room(self.client, self.room.room_id, text)
+
+    async def _add_room_greeting(self):
+        if self.event.sender == "@elen:nopasaran.gq":
+            curr_room = self.room.room_id
+            text = " ".join(self.args)
+            await self.store.store_room_data(curr_room, text)
+
+    async def _add_room_rules(self):
+        if self.event.sender == "@elen:nopasaran.gq":
+            curr_room = self.room.room_id
+            text = " ".join(self.args)
+            await self.store.store_room_data(curr_room, text)
+
+    async def _del_room_info(self):
+        if self.event.sender == "@elen:nopasaran.gq":
+            await self.store.delete_room_data(self.event.room_id)
+        else:
+            await send_text_to_room(self.client, self.room.room_id, "no.diggity")
+
+    async def _unknown_command(self):
+        await send_text_to_room(
+            self.client,
+            self.room.room_id,
+            f"Unknown command '{self.command}'. Try the 'help' command for more information.",
+        )
 
     async def _show_help(self):
         if not self.args:
@@ -141,66 +152,3 @@ class Command(object):
                 "url": "mxc://nopasaran.gq/sOVAcvkPQHOKezYpoCEOkvXp",
                 }
         await send_junk_to_room(self.client, self.room.room_id, content)
-
-    async def _status(self):
-        dead_person = self.args[0]
-        if dead_person == "reagan":
-            text = "Ronald Reagan's current status is: `Dead.`"
-        elif dead_person == "thatcher":
-            text = "Margaret Thatcher's current status is: `Dead.`"
-        elif dead_person == "kennedy":
-            text = "JFK's current status is: `Dead.` There are many theories as to who killed him, but the simple truth is: his head just *did* that."
-        elif dead_person == "kissinger":
-            text = "Thanks to the power contained within the souls of thousands of Cambodian children, Henry Kissinger's current status is: `Alive.`"
-        else:
-            text = "I'm sorry, I don't have information for that person. Please try again."
-        await send_text_to_room(self.client, self.room.room_id, text)
-
-    async def _add_room_greeting(self) -> Dbroom:
-        if self.event.sender == "@elen:nopasaran.gq":
-            curr_room = self.room.room_id
-            dbrooms = self.store.load_room_data()
-            for dbroom in dbrooms:
-                if curr_room == dbroom[0]:
-                    room_greeting = " ".join(self.args)
-                    room_rules = dbroom[2]
-                    is_listed = dbroom[3]
-                    dbroom = Dbroom(
-                        room_dbid=curr_room,
-                        room_greeting=room_greeting,
-                        room_rules=room_rules,
-                        is_listed=is_listed,
-                    )
-            await self.store.store_room_data(dbroom)
-
-    async def _add_room_rules(self) -> Dbroom:
-        if self.event.sender == "@elen:nopasaran.gq":
-            room_rules = " ".join(self.args)
-            curr_room = self.room.room_id
-            dbrooms = self.store.load_room_data()
-            for dbroom in dbrooms:
-                if curr_room == dbroom[0]:
-                    room_greeting = dbroom[1]
-                    is_listed = dbroom[3]
-                else:
-                    room_greeting = "None yet!"
-                new_dbroom = Dbroom(
-                    room_dbid=room_dbid,
-                    room_greeting=room_greeting,
-                    room_rules=room_rules,
-                    is_listed=is_listed,
-                )
-            await self.store.store_room_data(new_dbroom)
-
-    async def _del_room_info(self):
-        if self.event.sender == "@elen:nopasaran.gq":
-            await self.store.delete_room_data(self.event.room_id)
-        else:
-            await send_text_to_room(self.client, self.room.room_id, "no.diggity")
-
-    async def _unknown_command(self):
-        await send_text_to_room(
-            self.client,
-            self.room.room_id,
-            f"Unknown command '{self.command}'. Try the 'help' command for more information.",
-        )

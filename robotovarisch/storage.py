@@ -292,7 +292,8 @@ class Storage(object):
         try:
             self._execute("UPDATE room SET is_listed = NOT is_listed WHERE room_dbid = %s", (self.room.room_id))
         except Exception:
-            logger.info(f"{self.room.room_id} hasnt even been added ")
+            text = "please set a room greeting or rules first"
+            self.send_to_room(self.client, self.room.room_id, text)
 
     def delete_room_data(self, curr_room: str):
         self.cursor.execute("DELETE FROM room WHERE (room_dbid) = %s", (curr_room))
