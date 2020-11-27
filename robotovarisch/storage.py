@@ -219,7 +219,7 @@ class Storage(object):
             """
             )
             # Update the stored migration version
-            self._execute("UPDATE migration_version SET version = %s", (new_migration_version))
+            self.cursor.execute("UPDATE migration_version SET version = %s", (new_migration_version))
 
             logger.info("Database migrated to {new_migration_version}")
             current_migration_version = new_migration_version
@@ -232,30 +232,31 @@ class Storage(object):
         else:
             self.cursor.execute(*args)
 
-    def load_room_info(self, info: str, curr_room: str) -> str:
+    def load_room_info(self, curr_room, info):
+        logger.info(f"SELECT {info} FROM room WHERE room_dbid = {curr_room}")
         try:
-            tupled = self._execute("SELECT %s FROM room WHERE room_dbid = %s", (info), (curr_room))
+            tupled = self.cursor.execute("SELECT %s FROM room WHERE room_dbid = %s", (info), (curr_room))
             text = tupled[0]
             logger.info(f"{text}")
             return text
             # await send_text_to_room(self.client, curr_room, text)
         except Exception:
-            logger.info("no {info} for {self.room.room_id}")
+            logger.info(f"no {info} for {curr_room}")
 
-    def store_room_info(self, info: str, update: str):
+    def store_room_info(self, curr_room, info, update):
         try:
-            self._execute("UPDATE room SET %s = %s WHERE room_dbid = %s", (info), (update), (self.room.room_id))
+            self.cursor.execute("UPDATE room SET %s = %s WHERE room_dbid = %s", (info), (update), (curr_room))
         except Exception:
-            logger.info(f"adding {info} for {self.room.room_id}")
-            self._execute("INSERT INTO room (room_dbid) VALUES %s," (self.room.room_id))
-            self._execute("UPDATE room SET %s = %s WHERE room_dbid = %s", (info), (update), (self.room.room_id))
+            logger.info(f"adding {info} for {curr_room}")
+            self.cursor.execute("INSERT INTO room (room_dbid) VALUES %s," (curr_room))
+            self.cursor.execute("UPDATE room SET %s = %s WHERE room_dbid = %s", (info), (update), (curr_room))
 
-    def toggle_room_public(self):
+    def toggle_room_public(self, curr_room):
         try:
-            self._execute("UPDATE room SET is_listed = NOT is_listed WHERE room_dbid = %s", (self.room.room_id))
+            self.cursor.execute("UPDATE room SET is_listed = NOT is_listed WHERE room_dbid = %s", (curr_room))
         except Exception:
             text = "please set a room greeting or rules first"
-            self.send_to_room(self.client, self.room.room_id, text)
+            self.send_to_room(self.client, curr_room, text)
 
     def delete_room_data(self, curr_room: str):
         self.cursor.execute("DELETE FROM room WHERE (room_dbid) = %s", (curr_room))

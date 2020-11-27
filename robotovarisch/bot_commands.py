@@ -1,4 +1,5 @@
 import logging
+from codecs import encode
 
 from robotovarisch.chat_functions import send_text_to_room, send_junk_to_room, change_avatar, change_displayname
 logger = logging.getLogger(__name__)
@@ -46,6 +47,9 @@ class Command(object):
         else:
             await self._unknown_command()
 
+    def wrapit(x):
+        return encode("'%s'" % x)
+
     async def _nick(self):
         if self.event.sender == "@elen:nopasaran.gq":
             nick = " ".join(self.args)
@@ -68,28 +72,33 @@ class Command(object):
         await send_text_to_room(self.client, self.room.room_id, response)
 
     async def _greeting(self):
-        text = self.store.load_room_info("room_greeting", self.room.room_id)
+        info = "room_greeting"
+        curr_room = self.wrapit(self.room.room_id)
+        text = self.store.load_room_info(curr_room, info)
         await send_text_to_room(self.client, self.room.room_id, text)
 
     async def _rules(self):
-        text = self.store.load_room_info("room_rules", self.room.room_id)
+        info = "room_rules"
+        curr_room = self.wrapit(self.room.room_id)
+        text = self.store.load_room_info(curr_room, info)
         await send_text_to_room(self.client, self.room.room_id, text)
 
     async def _add_room_greeting(self):
         if self.event.sender == "@elen:nopasaran.gq":
-            curr_room = self.room.room_id
+            curr_room = self.wrapit(self.room.room_id)
             text = " ".join(self.args)
             await self.store.store_room_info(curr_room, "room_greeting", text)
 
     async def _add_room_rules(self):
         if self.event.sender == "@elen:nopasaran.gq":
-            curr_room = self.room.room_id
+            curr_room = self.wrapit(self.room.room_id)
             text = " ".join(self.args)
             await self.store.store_room_info(curr_room, "room_rules", text)
 
     async def _del_room_info(self):
         if self.event.sender == "@elen:nopasaran.gq":
-            await self.store.delete_room_data(self.event.room_id)
+            curr_room = self.wrapit(self.room.room_id)
+            await self.store.delete_room_data(curr_room)
         else:
             await send_text_to_room(self.client, self.room.room_id, "no.diggity")
 
