@@ -233,7 +233,7 @@ class Storage(object):
         else:
             self.cursor.execute(*args)
 
-    def load_room_greeting(self, curr_room: str):
+    async def load_room_greeting(self, curr_room: str):
         try:
             text = self._execute("SELECT room_greeting FROM room WHERE room_dbid = %s", (curr_room))
             await send_text_to_room(self.client, curr_room, text)
