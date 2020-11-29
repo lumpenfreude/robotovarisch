@@ -17,6 +17,11 @@ class Dbroom:
     is_listed: bool
 
 
+def quotate(x):
+    quotated = "'"+x+"'"
+    return quotated
+
+
 class Storage(object):
     def __init__(self, client: AsyncClient, database_config):
         """Setup the database
@@ -232,31 +237,58 @@ class Storage(object):
         else:
             self.cursor.execute(*args)
 
-    def load_room_info(self, curr_room, info):
-        logger.info(f"SELECT {info} FROM room WHERE room_dbid = {curr_room}")
-        try:
-            tupled = self.cursor.execute("SELECT %s FROM room WHERE room_dbid = %s", (info), (curr_room))
-            text = tupled[0]
-            logger.info(f"{text}")
-            return text
-            # await send_text_to_room(self.client, curr_room, text)
-        except Exception:
-            logger.info(f"no {info} for {curr_room}")
+    def check_exists(self, info, curr_room):
+        self.cursor.execute("SELECT %s FROM room WHERE room_dbid = %s", (info,), (curr_room,))
+        return self.cursor.fetchone() is not None
 
-    def store_room_info(self, curr_room, info, update):
-        try:
-            self.cursor.execute("UPDATE room SET %s = %s WHERE room_dbid = %s", (info), (update), (curr_room))
-        except Exception:
-            logger.info(f"adding {info} for {curr_room}")
-            self.cursor.execute("INSERT INTO room (room_dbid) VALUES %s," (curr_room))
-            self.cursor.execute("UPDATE room SET %s = %s WHERE room_dbid = %s", (info), (update), (curr_room))
+    def load_room_data(self, curr_room, info):
+        if info == "room_greeting":
+            sql = """
+                    SELECT room_greeting
+                    FROM room
+                    WHERE room_dbid = %s;
+                    """
+            record = self.cursor.execute(sql, (curr_room,))
+            if record:
+                logger.info(f"{record}")
+        if info == "room_rules":
+            sql = """
+                    SELECT room_rules
+                    FROM room
+                    WHERE room_dbid = %s;
+                    """
+            record = self.cursor.execute(sql, (curr_room,))
+            if record:
+                logger.info(f"{record}")
+
+    async def store_room_data(self, curr_room, info, update):
+        nah = 'f'
+        logger.info(f"adding {info} for {curr_room}")
+        if info == "room_greeting":
+            sql = """
+                    INSERT INTO ROOM (room_dbid, room_greeting, is_listed)
+                    VALUES (%s, %s, %s)
+                    ON CONFLICT (room_dbid) DO UPDATE
+                    SET room_greeting = (EXCLUDED.room_greeting);
+                    """
+            self.cursor.execute(sql, (curr_room, update, nah))
+        else:
+            sql = """
+                    INSERT INTO ROOM (room_dbid, room_rules, is_listed)
+                    VALUES (%s, %s, %s)
+                    ON CONFLICT (room_dbid) DO UPDATE
+                    SET room_rules = (EXCLUDED.room_rules);
+                    """
+            self.cursor.execute(sql, (curr_room, update, nah))
 
     def toggle_room_public(self, curr_room):
+        qroom = quotate(curr_room)
         try:
-            self.cursor.execute("UPDATE room SET is_listed = NOT is_listed WHERE room_dbid = %s", (curr_room))
+            self.cursor.execute("UPDATE room SET is_listed = NOT is_listed WHERE room_dbid = %s", (qroom))
         except Exception:
             text = "please set a room greeting or rules first"
             self.send_to_room(self.client, curr_room, text)
 
-    def delete_room_data(self, curr_room: str):
-        self.cursor.execute("DELETE FROM room WHERE (room_dbid) = %s", (curr_room))
+    def delete_room_data(self, curr_room):
+        qroom = quotate(curr_room)
+        self.cursor.execute("DELETE FROM room WHERE (room_dbid) = %s", (qroom))

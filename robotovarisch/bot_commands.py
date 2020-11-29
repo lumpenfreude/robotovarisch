@@ -1,5 +1,4 @@
 import logging
-from codecs import encode
 
 from robotovarisch.chat_functions import send_text_to_room, send_junk_to_room, change_avatar, change_displayname
 logger = logging.getLogger(__name__)
@@ -39,16 +38,13 @@ class Command(object):
         elif self.command.startswith("addroomgreet"):
             await self._add_room_greeting()
         elif self.command.startswith("delroomgreet"):
-            await self._del_room_info()
+            await self._del_room_data()
         elif self.command.startswith("addroomrules"):
             await self._add_room_rules()
         elif self.command.startswith("togglepublic"):
             await self._toggle_public()
         else:
             await self._unknown_command()
-
-    def wrapit(x):
-        return encode("'%s'" % x)
 
     async def _nick(self):
         if self.event.sender == "@elen:nopasaran.gq":
@@ -73,31 +69,34 @@ class Command(object):
 
     async def _greeting(self):
         info = "room_greeting"
-        curr_room = self.wrapit(self.room.room_id)
-        text = self.store.load_room_info(curr_room, info)
-        await send_text_to_room(self.client, self.room.room_id, text)
+        curr_room = self.room.room_id
+        logger.info(f"{curr_room}")
+        text = self.store.load_room_data(curr_room, info)
+        text2 = "plaxeholdwe textttt"
+        logger.info(f"{text}")
+        await send_text_to_room(self.client, self.room.room_id, text2)
 
     async def _rules(self):
         info = "room_rules"
-        curr_room = self.wrapit(self.room.room_id)
-        text = self.store.load_room_info(curr_room, info)
+        curr_room = self.room.room_id
+        text = self.store.load_room_data(curr_room, info)
         await send_text_to_room(self.client, self.room.room_id, text)
 
     async def _add_room_greeting(self):
         if self.event.sender == "@elen:nopasaran.gq":
-            curr_room = self.wrapit(self.room.room_id)
+            curr_room = self.room.room_id
             text = " ".join(self.args)
-            await self.store.store_room_info(curr_room, "room_greeting", text)
+            await self.store.store_room_data(curr_room, "room_greeting", text)
 
     async def _add_room_rules(self):
         if self.event.sender == "@elen:nopasaran.gq":
-            curr_room = self.wrapit(self.room.room_id)
+            curr_room = self.room.room_id
             text = " ".join(self.args)
-            await self.store.store_room_info(curr_room, "room_rules", text)
+            await self.store.store_room_data(curr_room, "room_rules", text)
 
-    async def _del_room_info(self):
+    async def _del_room_data(self):
         if self.event.sender == "@elen:nopasaran.gq":
-            curr_room = self.wrapit(self.room.room_id)
+            curr_room = self.room.room_id
             await self.store.delete_room_data(curr_room)
         else:
             await send_text_to_room(self.client, self.room.room_id, "no.diggity")
