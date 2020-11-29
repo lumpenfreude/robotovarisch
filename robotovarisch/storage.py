@@ -2,7 +2,7 @@ import logging
 
 from dataclasses import dataclass
 from nio import AsyncClient
-
+from psycopg2 import sql
 
 latest_migration_version = 0
 
@@ -238,56 +238,94 @@ class Storage(object):
             self.cursor.execute(*args)
 
     def check_exists(self, info, curr_room):
-        self.cursor.execute("SELECT %s FROM room WHERE room_dbid = %s", (info,), (curr_room,))
+        self.cursor.execute("SELECT room_greeting FROM room WHERE room_dbid IS %s", [curr_room])
         return self.cursor.fetchone() is not None
 
     def load_room_data(self, curr_room, info):
         if info == "room_greeting":
-            sql = """
-                    SELECT room_greeting
-                    FROM room
-                    WHERE room_dbid = %s;
-                    """
-            record = self.cursor.execute(sql, (curr_room,))
-            if record:
+            query = sql.SQL("select {field} from {table} where {pkey} = %s").format(
+                field=sql.Identifier('room_greeting'),
+                table=sql.Identifier('room'),
+                pkey=sql.Identifier('room_dbid')
+                )
+            self.cursor.execute(query, (curr_room,))
+            record = self.cursor.fetchall()
+            self.conn.commit()
+            if record is not None:
                 logger.info(f"{record}")
-        if info == "room_rules":
-            sql = """
-                    SELECT room_rules
-                    FROM room
-                    WHERE room_dbid = %s;
-                    """
-            record = self.cursor.execute(sql, (curr_room,))
-            if record:
+                greetings = record[0]
+                logger.info(f"{greetings}")
+                greeting = greetings[0]
+                return greeting
+        elif info == "room_rules":
+            query = sql.SQL("select {field} from {table} where {pkey} = %s").format(
+                field=sql.Identifier('room_rules'),
+                table=sql.Identifier('room'),
+                pkey=sql.Identifier('room_dbid')
+                )
+            self.cursor.execute(query, (curr_room,))
+            record = self.cursor.fetchall()
+            self.conn.commit()
+            if record is not None:
                 logger.info(f"{record}")
+                rules = record[0]
+                logger.info(f"{rules}")
+                rule = rules[0]
+                logger.info(f"{rule}")
+                return rule
 
     async def store_room_data(self, curr_room, info, update):
         nah = 'f'
         logger.info(f"adding {info} for {curr_room}")
         if info == "room_greeting":
-            sql = """
+            sqlreq = """
                     INSERT INTO ROOM (room_dbid, room_greeting, is_listed)
                     VALUES (%s, %s, %s)
                     ON CONFLICT (room_dbid) DO UPDATE
                     SET room_greeting = (EXCLUDED.room_greeting);
                     """
-            self.cursor.execute(sql, (curr_room, update, nah))
+            self.cursor.execute(sqlreq, (curr_room, update, nah))
         else:
-            sql = """
+            sqlreq = """
                     INSERT INTO ROOM (room_dbid, room_rules, is_listed)
                     VALUES (%s, %s, %s)
                     ON CONFLICT (room_dbid) DO UPDATE
                     SET room_rules = (EXCLUDED.room_rules);
                     """
-            self.cursor.execute(sql, (curr_room, update, nah))
+            self.cursor.execute(sqlreq, (curr_room, update, nah))
+
+    def get_public_rooms(self):
+        query = """
+                SELECT room_dbid
+                FROM room
+                WHERE is_listed = TRUE
+                """
+        self.cursor.execute(query)
+        rooms = self.cursor.fetchall()
+        self.conn.commit()
+        logger.info(f"{rooms}")
+        return rooms
 
     def toggle_room_public(self, curr_room):
-        qroom = quotate(curr_room)
-        try:
-            self.cursor.execute("UPDATE room SET is_listed = NOT is_listed WHERE room_dbid = %s", (qroom))
-        except Exception:
-            text = "please set a room greeting or rules first"
-            self.send_to_room(self.client, curr_room, text)
+        query = sql.SQL("select {field} from {table} where {pkey} = %s").format(
+                field=sql.Identifier('room_greeting'),
+                table=sql.Identifier('room'),
+                pkey=sql.Identifier('room_dbid')
+                )
+        self.cursor.execute(query, (curr_room,))
+        record = self.cursor.fetchall()
+        self.conn.commit()
+        if record is not None:
+            command = sql.SQL("update {table} set {field} = NOT {field} WHERE {pkey} = %s").format(
+                    field=sql.Identifier('is_listed'),
+                    table=sql.Identifier('room'),
+                    pkey=sql.Identifier('room_dbid')
+                    )
+            self.cursor.execute(command, (curr_room,))
+            self.conn.commit()
+            return record
+        else:
+            logger.info("room not set up")
 
     def delete_room_data(self, curr_room):
         qroom = quotate(curr_room)

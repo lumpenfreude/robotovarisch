@@ -35,6 +35,10 @@ class Command(object):
             await self._avatar()
         elif self.command.startswith("nick"):
             await self._nick()
+        elif self.command.startswith("getpublicrooms"):
+            await self._get_public()
+        elif self.command.startswith("getpowerlevel"):
+            await self._get_power_level()
         elif self.command.startswith("addroomgreet"):
             await self._add_room_greeting()
         elif self.command.startswith("delroomgreet"):
@@ -59,6 +63,19 @@ class Command(object):
             else:
                 await send_text_to_room(self.client, self.room.room_id, "that's not an mxc url")
 
+    async def _get_power_level(self):
+        nick = " ".join(self.args)
+        logger.info(f"{self.room.power_levels}")
+
+    async def _get_public(self):
+        self.store.get_public_rooms()
+        await send_text_to_room(self.client, self.room.room_id, "ok")
+
+    async def _toggle_public(self):
+        curr_room = self.room.room_id
+        self.store.toggle_room_public(curr_room)
+        await send_text_to_room(self.client, self.room.room_id, "ok")
+
     async def _list_rooms(self):
         text = "alad awaiting implemebtation lol holy fucj typijg wuthiut autocorrect is hard i think i meed a sialing wand"
         await send_text_to_room(self.client, self.room.room_id, text)
@@ -70,17 +87,17 @@ class Command(object):
     async def _greeting(self):
         info = "room_greeting"
         curr_room = self.room.room_id
-        logger.info(f"{curr_room}")
         text = self.store.load_room_data(curr_room, info)
-        text2 = "plaxeholdwe textttt"
         logger.info(f"{text}")
-        await send_text_to_room(self.client, self.room.room_id, text2)
+        if text is not None:
+            await send_text_to_room(self.client, self.room.room_id, text)
 
     async def _rules(self):
         info = "room_rules"
         curr_room = self.room.room_id
         text = self.store.load_room_data(curr_room, info)
-        await send_text_to_room(self.client, self.room.room_id, text)
+        if text is not None:
+            await send_text_to_room(self.client, self.room.room_id, text)
 
     async def _add_room_greeting(self):
         if self.event.sender == "@elen:nopasaran.gq":

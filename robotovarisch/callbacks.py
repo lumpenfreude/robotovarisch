@@ -4,7 +4,7 @@ import logging
 from robotovarisch.bot_commands import Command
 from robotovarisch.message_responses import Message
 from robotovarisch.inv_routine import Invitation
-from robotovarisch.info import Info
+from robotovarisch.event_functions import Event
 logger = logging.getLogger(__name__)
 
 
@@ -69,8 +69,8 @@ class Callbacks(object):
         if event.sender == self.client.user:
             return
         if event.membership == "join" and event.prev_membership != "join":
-            info = Info(self.client, self.store, self.config, event.content, room, event)
-            await info.welcome()
+            event = Event(self.client, self.store, self.config, event.content, room, event)
+            await event._welcome()
 
     async def invite(self, room, event):
         logger.debug(f"Got invite to {room.room_id} from {event.sender}.")
