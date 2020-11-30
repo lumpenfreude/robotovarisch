@@ -1,7 +1,6 @@
 import logging
 
-from dataclasses import dataclass
-from nio import AsyncClient
+from nio import AsyncClient, MatrixRoom
 from psycopg2 import sql
 
 latest_migration_version = 0
@@ -9,39 +8,15 @@ latest_migration_version = 0
 logger = logging.getLogger(__name__)
 
 
-@dataclass
-class Dbroom:
-    room_dbid: str
-    room_greeting: str
-    room_rules: str
-    is_listed: bool
-
-
-def quotate(x):
-    quotated = "'"+x+"'"
-    return quotated
-
-
 class Storage(object):
-    def __init__(self, client: AsyncClient, database_config):
-        """Setup the database
-
-        Runs an initial setup or migrations depending on whether a database file has already
-        been created
-
-        Args:
-            database_config: a dictionary containing the following keys:
-                * type: A string, one of "sqlite" or "postgres"
-                * connection_string: A string, featuring a connection string that
-                    be fed to each respective db library's `connect` method
-        """
+    def __init__(self, client: AsyncClient, room: MatrixRoom, database_config):
         self.client = client
         self.conn = self._get_database_connection(
             database_config["type"], database_config["connection_string"]
         )
         self.cursor = self.conn.cursor()
         self.db_type = database_config["type"]
-
+        self.room = room
         # Try to check the current migration version
         migration_level = 0
         try:
@@ -237,10 +212,6 @@ class Storage(object):
         else:
             self.cursor.execute(*args)
 
-    def check_exists(self, info, curr_room):
-        self.cursor.execute("SELECT room_greeting FROM room WHERE room_dbid IS %s", [curr_room])
-        return self.cursor.fetchone() is not None
-
     def load_room_data(self, curr_room, info):
         if info == "room_greeting":
             query = sql.SQL("select {field} from {table} where {pkey} = %s").format(
@@ -252,9 +223,7 @@ class Storage(object):
             record = self.cursor.fetchall()
             self.conn.commit()
             if record is not None:
-                logger.info(f"{record}")
                 greetings = record[0]
-                logger.info(f"{greetings}")
                 greeting = greetings[0]
                 return greeting
         elif info == "room_rules":
@@ -267,11 +236,8 @@ class Storage(object):
             record = self.cursor.fetchall()
             self.conn.commit()
             if record is not None:
-                logger.info(f"{record}")
                 rules = record[0]
-                logger.info(f"{rules}")
                 rule = rules[0]
-                logger.info(f"{rule}")
                 return rule
 
     async def store_room_data(self, curr_room, info, update):
@@ -301,10 +267,12 @@ class Storage(object):
                 WHERE is_listed = TRUE
                 """
         self.cursor.execute(query)
-        rooms = self.cursor.fetchall()
-        self.conn.commit()
-        logger.info(f"{rooms}")
-        return rooms
+        row = self.cursor.fetchall()
+        public = []
+        for x in row:
+            room_dbid = x[0]
+            public.append(room_dbid)
+        return public
 
     def toggle_room_public(self, curr_room):
         query = sql.SQL("select {field} from {table} where {pkey} = %s").format(
@@ -328,5 +296,4 @@ class Storage(object):
             logger.info("room not set up")
 
     def delete_room_data(self, curr_room):
-        qroom = quotate(curr_room)
-        self.cursor.execute("DELETE FROM room WHERE (room_dbid) = %s", (qroom))
+        self.cursor.execute("DELETE FROM room WHERE (room_dbid) = %s", (curr_room))

@@ -11,6 +11,7 @@ from nio import (
     InviteMemberEvent,
     LocalProtocolError,
     LoginError,
+    MatrixRoom,
     RoomMessageText,
     RoomMemberEvent,
 )
@@ -48,8 +49,8 @@ async def main():
         store_path=config.store_path,
         config=client_config,
     )
-
-    store = Storage(client, config.database)
+    room = MatrixRoom
+    store = Storage(client, room, config.database)
 
     # Set up event callbacks
     callbacks = Callbacks(client, store, config)

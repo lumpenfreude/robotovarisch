@@ -1,4 +1,5 @@
 import logging
+import json
 
 from robotovarisch.chat_functions import send_text_to_room, send_junk_to_room, change_avatar, change_displayname
 logger = logging.getLogger(__name__)
@@ -35,8 +36,6 @@ class Command(object):
             await self._avatar()
         elif self.command.startswith("nick"):
             await self._nick()
-        elif self.command.startswith("getpublicrooms"):
-            await self._get_public()
         elif self.command.startswith("getpowerlevel"):
             await self._get_power_level()
         elif self.command.startswith("addroomgreet"):
@@ -65,11 +64,10 @@ class Command(object):
 
     async def _get_power_level(self):
         nick = " ".join(self.args)
+        stuff = json.load(self.room.power_levels)
+        for x in stuff:
+            logger.info("{x}")
         logger.info(f"{self.room.power_levels}")
-
-    async def _get_public(self):
-        self.store.get_public_rooms()
-        await send_text_to_room(self.client, self.room.room_id, "ok")
 
     async def _toggle_public(self):
         curr_room = self.room.room_id
@@ -77,8 +75,10 @@ class Command(object):
         await send_text_to_room(self.client, self.room.room_id, "ok")
 
     async def _list_rooms(self):
-        text = "alad awaiting implemebtation lol holy fucj typijg wuthiut autocorrect is hard i think i meed a sialing wand"
-        await send_text_to_room(self.client, self.room.room_id, text)
+        text = self.store.get_public_rooms()
+        for x in text:
+            await send_text_to_room(self.client, self.room.room_id, x)
+        await send_text_to_room(self.client, self.room.room_id, "idk man that\'s all i got right now.")
 
     async def _echo(self):
         response = " ".join(self.args)
