@@ -1,4 +1,8 @@
+import logging
+
+
 from robotovarisch.chat_functions import send_text_to_room
+logger = logging.getLogger(__name__)
 
 
 class Event(object):
@@ -17,5 +21,8 @@ class Event(object):
     async def _welcome(self):
         curr_room = self.room.room_id
         greeting = "room_greeting"
-        room = self.store.load_room_data(curr_room, greeting)
-        await send_text_to_room(self.client, curr_room, room)
+        try:
+            room = self.store.load_room_data(curr_room, greeting)
+            await send_text_to_room(self.client, curr_room, room)
+        except AttributeError:
+            logger.info("yeah something messed up idk")

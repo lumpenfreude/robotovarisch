@@ -225,7 +225,9 @@ class Storage(object):
             if record is not None:
                 greetings = record[0]
                 greeting = greetings[0]
-                return greeting
+            else:
+                greeting = "no greeting set PLEWSE LET ME GREET TYEBPEOLEPELE"
+            return greeting
         elif info == "room_rules":
             query = sql.SQL("select {field} from {table} where {pkey} = %s").format(
                 field=sql.Identifier('room_rules'),
@@ -238,7 +240,9 @@ class Storage(object):
             if record is not None:
                 rules = record[0]
                 rule = rules[0]
-                return rule
+            else:
+                rule = "no rules lel"
+            return rule
 
     async def store_room_data(self, curr_room, info, update):
         nah = 'f'

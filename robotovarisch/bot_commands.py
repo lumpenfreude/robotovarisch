@@ -1,6 +1,7 @@
 import logging
-import json
+import random
 
+from nio import PowerLevels as pl
 from robotovarisch.chat_functions import send_text_to_room, send_junk_to_room, change_avatar, change_displayname
 logger = logging.getLogger(__name__)
 
@@ -32,6 +33,8 @@ class Command(object):
             await self._status()
         elif self.command.startswith("comfort"):
             await self._comfort()
+        elif self.command.startswith("roll"):
+            await self._rolldice()
         elif self.command.startswith("avatar"):
             await self._avatar()
         elif self.command.startswith("nick"):
@@ -62,22 +65,22 @@ class Command(object):
             else:
                 await send_text_to_room(self.client, self.room.room_id, "that's not an mxc url")
 
-    async def _get_power_level(self):
-        nick = " ".join(self.args)
-        stuff = json.load(self.room.power_levels)
-        for x in stuff:
-            logger.info("{x}")
-        logger.info(f"{self.room.power_levels}")
-
     async def _toggle_public(self):
-        curr_room = self.room.room_id
-        self.store.toggle_room_public(curr_room)
-        await send_text_to_room(self.client, self.room.room_id, "ok")
+        usrlvl = pl.get_user_level(self.room.power_levels, self.event.sender)
+        if usrlvl == 100:
+            curr_room = self.room.room_id
+            self.store.toggle_room_public(curr_room)
+            await send_text_to_room(self.client, self.room.room_id, "ok")
+        else:
+            await send_text_to_room(self.client, self.room.room_id, "you need to be room admin to do that, friendo")
+
 
     async def _list_rooms(self):
         text = self.store.get_public_rooms()
         for x in text:
-            await send_text_to_room(self.client, self.room.room_id, x)
+            room_state = await self.client.room_get_state_event(x, "m.room.topic")
+            logger.info(room_state)
+            await send_text_to_room(self.client, self.room.room_id, "ok")
         await send_text_to_room(self.client, self.room.room_id, "idk man that\'s all i got right now.")
 
     async def _echo(self):
@@ -100,19 +103,28 @@ class Command(object):
             await send_text_to_room(self.client, self.room.room_id, text)
 
     async def _add_room_greeting(self):
-        if self.event.sender == "@elen:nopasaran.gq":
+        usrlvl = pl.get_user_level(self.room.power_levels, self.event.sender)
+        logger.info(f"{usrlvl}")
+        if usrlvl == 100:
             curr_room = self.room.room_id
             text = " ".join(self.args)
             await self.store.store_room_data(curr_room, "room_greeting", text)
+        else:
+            await send_text_to_room(self.client, self.room.room_id, "you need to be room admin to do that, friendo")
+
 
     async def _add_room_rules(self):
-        if self.event.sender == "@elen:nopasaran.gq":
+        usrlvl = pl.get_user_level(self.room.power_levels, self.event.sender)
+        if usrlvl == 100:
             curr_room = self.room.room_id
             text = " ".join(self.args)
             await self.store.store_room_data(curr_room, "room_rules", text)
+        else:
+            await send_text_to_room(self.client, self.room.room_id, "you need to be room admin to do that, friendo")
 
     async def _del_room_data(self):
-        if self.event.sender == "@elen:nopasaran.gq":
+        usrlvl = pl.get_user_level(self.room, self.event.sender)
+        if usrlvl == 100:
             curr_room = self.room.room_id
             await self.store.delete_room_data(curr_room)
         else:
@@ -124,6 +136,35 @@ class Command(object):
             self.room.room_id,
             f"Unknown command '{self.command}'. Try the 'help' command for more information.",
         )
+
+    async def _rolldice(self):
+        result = 0
+        result_total = ''
+        try:
+            numdice = self.args.split('d')[0]
+            diceval = self.args.split('d')[1]
+        except Exception as e:
+            print(e)
+            await send_text_to_room(self.client, self.room.room_id, "format should be !comrade roll (x)d(y) with the number of dice and the sides being x and y, respectively. and no parentheses.")
+
+        if int(numdice) > 500:
+            await send_text_to_room(self.client, self.room.room_id, "oh my god that's so many dice what are you trying to do to me")
+        rolls, limit = map(int, self.args.split('d'))
+
+        for r in range(rolls):
+            number = random.randint(1, limit)
+            result_total = result_total + number
+            if result == '':
+                result += str(number)
+            else:
+                result += ', ' + str(number)
+
+        if numdice == '1':
+            await send_text_to_room(self.client, self.room.room_id, result)
+
+        else:
+            response = result + " Total: " + str(result)
+            await send_text_to_room(self.client, self.room.room_id, response)
 
     async def _show_help(self):
         if not self.args:
