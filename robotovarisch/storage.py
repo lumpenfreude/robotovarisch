@@ -155,8 +155,6 @@ class Storage(object):
 
             self._execute("ALTER TABLE room RENAME to room_temp")
 
-            self._execute("drop index listed_rooms")
-
             self._execute(
                 """
                 CREATE TABLE room (
@@ -216,10 +214,11 @@ class Storage(object):
         default_rules = "No rules set. Follow the server rules ***or else.***"
         greet_default = FALSE
         self.cursor.execute(sqlreq, (self.room.room_id, self.room.display_name, default_greeting, default_rules, greet_default)
+        logger.info(f"created database entry for {self.room.room_id}, aka {self.room.roomAlias}")
 
-    def load_room_data(self, field):
+    def load_room_data(self, field, room_dbid):
         sqlreq = """
-                SELECT {field} FROM room WHERE room_dbid = {self.room.room_id};
+                SELECT {field} FROM room WHERE room_dbid = {room_dbid};
                 """
         record = self.cursor.execute(sqlreq)
         return record
