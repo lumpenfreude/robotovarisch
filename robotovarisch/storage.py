@@ -75,9 +75,10 @@ class Storage(object):
             """
             CREATE TABLE room (
             room_dbid TEXT PRIMARY KEY,
+            room_dbname TEXT,
             room_greeting TEXT,
             room_rules TEXT,
-            is_listed BOOL NOT NULL
+            greeting_enabled BOOL
             )
             """,
         )
@@ -111,9 +112,10 @@ class Storage(object):
                 """
                 CREATE TABLE room (
                 room_dbid TEXT PRIMARY KEY,
+                room_dbname TEXT,
                 room_greeting TEXT,
                 room_rules TEXT,
-                is_listed BOOL NOT NULL
+                greeting_enabled BOOL
                 )
                 """,
             )
@@ -122,24 +124,20 @@ class Storage(object):
                 """
                 INSERT INTO room (
                     room_dbid,
+                    room_dbname,
                     room_greeting,
                     room_rules,
-                    is_listed
+                    greeting_enabled
                 )
                 SELECT FROM room_temp (
                     room_dbid,
+                    room_dbname,
                     room_greeting,
                     room_rules,
-                    is_listed
+                    greeting_enabled
                 )
                 """,
             )
-
-            self._execute(
-                    """
-                    create index listed_rooms on room using btree (is_listed)
-                    """,
-                    )
 
             self._execute(
                 """
@@ -163,9 +161,10 @@ class Storage(object):
                 """
                 CREATE TABLE room (
                 room_dbid TEXT PRIMARY KEY,
+                room_dbname TEXT,
                 room_greeting TEXT,
                 room_rules TEXT,
-                is_listed BOOL NOT NULL
+                greeting_enabled BOOL
                 )
                 """,
             )
@@ -174,30 +173,26 @@ class Storage(object):
                 """
                 INSERT INTO room (
                     room_dbid,
+                    room_dbname,
                     room_greeting,
                     room_rules,
-                    is_listed
+                    greeting_enabled
                 )
                 SELECT FROM room_temp (
                     room_dbid,
+                    room_dbname,
                     room_greeting,
                     room_rules,
-                    is_listed
+                    greeting_enabled
                 )
                 """,
             )
 
             self._execute(
-                    """
-                    create index listed_rooms on room using btree (is_listed)
-                    """,
-                    )
-
-            self._execute(
                 """
                 DROP table room_temp
-            """
-            )
+                """
+                )
             # Update the stored migration version
             self.cursor.execute("UPDATE migration_version SET version = %s", (new_migration_version))
 
@@ -212,92 +207,33 @@ class Storage(object):
         else:
             self.cursor.execute(*args)
 
-    def load_room_data(self, curr_room, info):
-        if info == "room_greeting":
-            query = sql.SQL("select {field} from {table} where {pkey} = %s").format(
-                field=sql.Identifier('room_greeting'),
-                table=sql.Identifier('room'),
-                pkey=sql.Identifier('room_dbid')
-                )
-            self.cursor.execute(query, (curr_room,))
-            record = self.cursor.fetchall()
-            self.conn.commit()
-            if record is not None:
-                greetings = record[0]
-                greeting = greetings[0]
-            else:
-                greeting = "no greeting set PLEWSE LET ME GREET TYEBPEOLEPELE"
-            return greeting
-        elif info == "room_rules":
-            query = sql.SQL("select {field} from {table} where {pkey} = %s").format(
-                field=sql.Identifier('room_rules'),
-                table=sql.Identifier('room'),
-                pkey=sql.Identifier('room_dbid')
-                )
-            self.cursor.execute(query, (curr_room,))
-            record = self.cursor.fetchall()
-            self.conn.commit()
-            if record is not None:
-                rules = record[0]
-                rule = rules[0]
-            else:
-                rule = "no rules lel"
-            return rule
-
-    async def store_room_data(self, curr_room, info, update):
-        nah = 'f'
-        logger.info(f"adding {info} for {curr_room}")
-        if info == "room_greeting":
-            sqlreq = """
-                    INSERT INTO ROOM (room_dbid, room_greeting, is_listed)
-                    VALUES (%s, %s, %s)
-                    ON CONFLICT (room_dbid) DO UPDATE
-                    SET room_greeting = (EXCLUDED.room_greeting);
-                    """
-            self.cursor.execute(sqlreq, (curr_room, update, nah))
-        else:
-            sqlreq = """
-                    INSERT INTO ROOM (room_dbid, room_rules, is_listed)
-                    VALUES (%s, %s, %s)
-                    ON CONFLICT (room_dbid) DO UPDATE
-                    SET room_rules = (EXCLUDED.room_rules);
-                    """
-            self.cursor.execute(sqlreq, (curr_room, update, nah))
-
-    def get_public_rooms(self):
-        query = """
-                SELECT room_dbid
-                FROM room
-                WHERE is_listed = TRUE
+    def on_room_join(self):
+        sqlreq = """
+                INSERT INTO ROOM (room_dbid, room_dbname, room_rules, greeting_enabled)
+                VALUES (%s, %s, %s, %s);
                 """
-        self.cursor.execute(query)
-        row = self.cursor.fetchall()
-        public = []
-        for x in row:
-            room_dbid = x[0]
-            public.append(room_dbid)
-        return public
+        default_greeting = "Hello I am a robot. Please set me up."
+        default_rules = "No rules set. Follow the server rules ***or else.***"
+        greet_default = FALSE
+        self.cursor.execute(sqlreq, (self.room.room_id, self.room.display_name, default_greeting, default_rules, greet_default)
 
-    def toggle_room_public(self, curr_room):
-        query = sql.SQL("select {field} from {table} where {pkey} = %s").format(
-                field=sql.Identifier('room_greeting'),
-                table=sql.Identifier('room'),
-                pkey=sql.Identifier('room_dbid')
-                )
-        self.cursor.execute(query, (curr_room,))
-        record = self.cursor.fetchall()
-        self.conn.commit()
-        if record is not None:
-            command = sql.SQL("update {table} set {field} = NOT {field} WHERE {pkey} = %s").format(
-                    field=sql.Identifier('is_listed'),
-                    table=sql.Identifier('room'),
-                    pkey=sql.Identifier('room_dbid')
-                    )
-            self.cursor.execute(command, (curr_room,))
-            self.conn.commit()
-            return record
-        else:
-            logger.info("room not set up")
+    def load_room_data(self, field):
+        sqlreq = """
+                SELECT {field} FROM room WHERE room_dbid = {self.room.room_id};
+                """
+        record = self.cursor.execute(sqlreq)
+        return record
 
-    def delete_room_data(self, curr_room):
-        self.cursor.execute("DELETE FROM room WHERE (room_dbid) = %s", (curr_room))
+    def save_room_data(self, field, info):
+        sqlreq = """
+                UPDATE room
+                SET {field} = {info}
+                WHERE room_dbid = {self.room.room_id};
+                """
+        self.cursor.execute(sqlreq)
+
+    def toggle_room_setting(self, field):
+        sqlreq = """
+                UPDATE table SET boolean_field = NOT boolean_field WHERE id = {field};
+                """
+        self.cursor.execute(sqlreq)
