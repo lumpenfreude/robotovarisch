@@ -24,11 +24,11 @@ class Command(object):
         elif self.command.startswith("nick"):
             await self._nick()
         elif self.command.startswith("admin"):
-            await.self._admin_stuff()
+            await self._admin_stuff()
         elif self.command.startswith("rules"):
-            await.self._get_rules()
+            await self._get_rules()
         elif self.command.startswith("hello"):
-            await.self._get_greeting()
+            await self._get_greeting()
         else:
             await self._unknown_command()
 
@@ -52,15 +52,15 @@ class Command(object):
             topic = self.args[0]
             if topic == "rules":
                 field = "room_rules"
-                info = " ".join.(self.args)
+                info = " ".join(self.args)
                 self.store.save_room_data(field, info)
-            elif topic == "greeting"
+            elif topic == "greeting":
                 field = room_greeting
-                info = " ".join.(self.args)
+                info = " ".join(self.args)
                 self.store.save_room_data(field, info)
-            elif topic == "toggle"
+            elif topic == "toggle":
                 toggled = self.args[1]
-                if toggled = "greeting":
+                if toggled == "greeting":
                     field = "greeting_enabled"
                     self.store.toggle_room_setting(field)
                 else:

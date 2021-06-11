@@ -206,24 +206,23 @@ class Storage(object):
             self.cursor.execute(*args)
 
     def on_room_join(self):
-        sqlreq = """
-                INSERT INTO ROOM (room_dbid, room_dbname, room_rules, greeting_enabled)
-                VALUES (%s, %s, %s, %s);
-                """
+        sqlreq = "INSERT INTO ROOM (room_dbid, room_dbname, room_rules, greeting_enabled) VALUES (%s, %s, %s, %s);"
         default_greeting = "Hello I am a robot. Please set me up."
         default_rules = "No rules set. Follow the server rules ***or else.***"
         greet_default = FALSE
         self.cursor.execute(sqlreq, (self.room.room_id, self.room.display_name, default_greeting, default_rules, greet_default)
-        logger.info(f"created database entry for {self.room.room_id}, aka {self.room.roomAlias}")
 
-    def load_room_data(self, field, room_dbid):
+    def load_room_data(self, record):
         sqlreq = """
-                SELECT {field} FROM room WHERE room_dbid = {room_dbid};
+                SELECT {field} FROM room WHERE room_dbid = {working_room};
                 """
-        record = self.cursor.execute(sqlreq)
-        return record
+        self.cursor.execute(sqlreq)
+        record = self.cursor.fetchall()
+        thing = type(record)
+        logger.info(f"record is {thing}")
+        return record 
 
-    def save_room_data(self, field, info):
+    def save_room_data(self):
         sqlreq = """
                 UPDATE room
                 SET {field} = {info}
@@ -231,7 +230,7 @@ class Storage(object):
                 """
         self.cursor.execute(sqlreq)
 
-    def toggle_room_setting(self, field):
+    def toggle_room_setting(self):
         sqlreq = """
                 UPDATE table SET boolean_field = NOT boolean_field WHERE id = {field};
                 """
