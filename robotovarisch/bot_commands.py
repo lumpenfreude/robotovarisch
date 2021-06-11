@@ -72,15 +72,15 @@ class Command(object):
 
     async def _get_rules(self):
         field = "room_rules"
-        record = self.store.load_room_data(self, field)
+        record = self.store.load_room_data(field)
         logger.info(f"retrieved {record} from {self.room.room_id}")
 
     async def _get_greeting(self):
         field = "room_greeting"
-        record = self.store.load_room_data(self, field)
+        record = self.store.load_room_data(field)
         logger.info(f"retrieved {record} from {self.room.room_id}")
         field = "greeting_enabled"
-        record = self.store.load_room_data(self, field)
+        record = self.store.load_room_data(field)
         logger.info(f"retrieved {record} from {self.room.room_id}")
     async def _echo(self):
         response = " ".join(self.args)

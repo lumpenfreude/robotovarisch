@@ -25,4 +25,5 @@ class Invitation(object):
                 break
         else:
             logger.error("Unable to join room: %s", self.room.room_id)
+        self.store.on_room_join()
         logger.info(f"joined {self.room.room_id}")
