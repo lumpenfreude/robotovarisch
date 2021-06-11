@@ -210,7 +210,7 @@ class Storage(object):
         default_greeting = "Hello I am a robot. Please set me up."
         default_rules = "No rules set. Follow the server rules ***or else.***"
         greet_default = FALSE
-        self.cursor.execute(sqlreq, (self.room.room_id, self.room.display_name, default_greeting, default_rules, greet_default)
+        self.cursor.execute(sqlreq, (self.room.room_id, self.room.display_name, default_greeting, default_rules, greet_default))
 
     def load_room_data(self, record):
         sqlreq = """
