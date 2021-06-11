@@ -82,6 +82,7 @@ class Command(object):
         field = "greeting_enabled"
         record = self.store.load_room_data(field)
         logger.info(f"retrieved {record} from {self.room.room_id}")
+
     async def _echo(self):
         response = " ".join(self.args)
         await send_text_to_room(self.client, self.room.room_id, response)
