@@ -199,33 +199,39 @@ class Storage(object):
         else:
             self.cursor.execute(*args)
 
-    def on_room_join(self):
-        sqlreq = "INSERT INTO ROOM (room_dbid, room_dbname, room_rules, greeting_enabled) VALUES (%s, %s, %s, %s);"
-        default_greeting = "Hello I am a robot. Please set me up."
-        default_rules = "No rules set. Follow the server rules ***or else.***"
-        greet_default = False
-        self.cursor.execute(sqlreq, (self.room.room_id, self.room.display_name, default_greeting, default_rules, greet_default))
-
-    def load_room_data(self, record):
+    def on_room_join(self, working_room, desc):
         sqlreq = """
-                SELECT {field} FROM room WHERE room_dbid = {working_room};
-                """
-        self.cursor.execute(sqlreq)
-        record = self.cursor.fetchall()
-        thing = type(record)
-        logger.info(f"record is {thing}")
-        return record 
+        INSERT INTO room (room_dbid, room_dbname, room_greeting, room_rules, greeting_enabled) 
+        VALUES (%s, %s, %s, %s, %s)
+        ON CONFLICT (room_dbid) DO NOTHING;
+        """
+        default_greeting = "Hello I am a robot. Please set me up."
+        default_rules = "No rules set. Follow the server rules or else."
+        greet_default = False
+        logger.info(f"{working_room} aka {desc}: {default_greeting}")
+        self.cursor.execute(sqlreq, (working_room, desc, default_greeting, default_rules, greet_default))
 
-    def save_room_data(self):
+    def load_room_data(self, field, working_room):
+        record = []
+        sqlreq = "SELECT * FROM room WHERE room_dbid = %s;"
+        self.cursor.execute(sqlreq, (working_room,))
+        record = self.cursor.fetchall()[0]
+      
+        if field == "room_greeting":
+            return record[2]
+        elif field == "room_rules":
+            return record[3]
+        elif field == "greeting_enabled":
+            return record[4]
+
+    async def save_room_data(self, field, info, working_room):
         sqlreq = """
                 UPDATE room
-                SET {field} = {info}
-                WHERE room_dbid = {self.room.room_id};
+                SET field = info
+                WHERE room_dbid = %s;
                 """
-        self.cursor.execute(sqlreq)
+        self.cursor.execute(sqlreq, (field, info, working_room))
 
-    def toggle_room_setting(self):
-        sqlreq = """
-                UPDATE table SET boolean_field = NOT boolean_field WHERE id = {field};
-                """
-        self.cursor.execute(sqlreq)
+    async def toggle_room_setting(self, field):
+        sqlreq = "UPDATE table SET boolean_field = NOT boolean_field WHERE id = %s;"
+        self.cursor.execute(sqlreq, (field,))

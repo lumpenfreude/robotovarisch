@@ -12,6 +12,7 @@ class Invitation(object):
         self.room = room
         self.event = event
 
+
     async def process(self):
         for attempt in range(3):
             result = await self.client.join(self.room.room_id)
@@ -25,5 +26,7 @@ class Invitation(object):
                 break
         else:
             logger.error("Unable to join room: %s", self.room.room_id)
-        self.store.on_room_join()
+        working_room = self.room.room_id
+        desc = self.room.display_name
+        self.store.on_room_join(working_room, desc)
         logger.info(f"joined {self.room.room_id}")

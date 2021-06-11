@@ -1,6 +1,7 @@
 import logging
 
 from robotovarisch.chat_functions import send_text_to_room, change_avatar, change_displayname
+from robotovarisch.storage import Storage 
 logger = logging.getLogger(__name__)
 
 
@@ -53,35 +54,39 @@ class Command(object):
             if topic == "rules":
                 field = "room_rules"
                 info = " ".join(self.args)
-                self.store.save_room_data(field, info)
+                await save_room_data(self, field, info, self.room.room_id)
             elif topic == "greeting":
                 field = room_greeting
                 info = " ".join(self.args)
-                self.store.save_room_data(field, info)
+                await save_room_data(self, field, info, self.room.room_id)
             elif topic == "toggle":
                 toggled = self.args[1]
                 if toggled == "greeting":
                     field = "greeting_enabled"
-                    self.store.toggle_room_setting(field)
+                    await toggle_room_setting(self, field, self.room.room_id)
                 else:
                     text = "`Ye cannot toggle ye flaske`"
-                    self.send_text_to_room(self.client, self.room.room_id, text)
+                    await send_text_to_room(self.client, self.room.room_id, text)
             else:
                 text = "`Ye cannot adminne ye flaske`"
-                self.send_text_to_room(self.client, self.room.room_id, text)
+                await send_text_to_room(self.client, self.room.room_id, text)
 
     async def _get_rules(self):
-        field = "room_rules"
-        record = self.store.load_room_data(field)
-        logger.info(f"retrieved {record} from {self.room.room_id}")
+        rules = self.store.load_room_data("room_rules", self.room.room_id)
+        await send_text_to_room(
+                self.client,
+                self.room.room_id,
+                f"{rules}"
+                )
 
     async def _get_greeting(self):
-        field = "room_greeting"
-        record = self.store.load_room_data(field)
-        logger.info(f"retrieved {record} from {self.room.room_id}")
-        field = "greeting_enabled"
-        record = self.store.load_room_data(field)
-        logger.info(f"retrieved {record} from {self.room.room_id}")
+        greetz = self.store.load_room_data("room_greeting", self.room.room_id)
+        greeton = self.store.load_room_data("greeting_enabled", self.room.room_id)
+        await send_text_to_room(
+                self.client,
+                self.room.room_id,
+                f"Room greeting is '{greetz}' Currently Enabled? {greeton}"
+                )
 
     async def _echo(self):
         response = " ".join(self.args)
