@@ -83,12 +83,6 @@ class Storage(object):
             """,
         )
 
-        self._execute(
-                """
-                create index listed_rooms on room using btree (is_listed)
-                """,
-                )
-
         logger.info("Database setup complete")
 
     def _run_migrations(self, current_migration_version: int):
@@ -209,7 +203,7 @@ class Storage(object):
         sqlreq = "INSERT INTO ROOM (room_dbid, room_dbname, room_rules, greeting_enabled) VALUES (%s, %s, %s, %s);"
         default_greeting = "Hello I am a robot. Please set me up."
         default_rules = "No rules set. Follow the server rules ***or else.***"
-        greet_default = FALSE
+        greet_default = False
         self.cursor.execute(sqlreq, (self.room.room_id, self.room.display_name, default_greeting, default_rules, greet_default))
 
     def load_room_data(self, record):

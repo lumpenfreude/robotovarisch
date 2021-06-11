@@ -80,6 +80,6 @@ class Callbacks(object):
 
     async def _welcome(self, working_room):
         can_greet = self.store.load_room_data("greeting_enabled", working_room)
-        if can_greet == "TRUE":
+        if can_greet is True:
             hello = self.store.load_room_data("room_greeting", working_room)
             await send_text_to_room(self.client, working_room, hello)
