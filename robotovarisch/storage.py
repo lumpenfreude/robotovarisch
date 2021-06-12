@@ -224,14 +224,22 @@ class Storage(object):
         elif field == "greeting_enabled":
             return record[4]
 
-    async def save_room_data(self, field, info, working_room):
+    def update_room_greet(self, info, working_room):
         sqlreq = """
                 UPDATE room
-                SET field = info
+                SET room_greeting = (%s)
                 WHERE room_dbid = %s;
                 """
-        self.cursor.execute(sqlreq, (field, info, working_room))
+        self.cursor.execute(sqlreq, (info, working_room))
 
-    async def toggle_room_setting(self, field):
-        sqlreq = "UPDATE table SET boolean_field = NOT boolean_field WHERE id = %s;"
-        self.cursor.execute(sqlreq, (field,))
+    def update_room_rules(self, info, working_room):
+        sqlreq = """
+                UPDATE room
+                SET rules = (%s)
+                WHERE room_dbid = %s;
+                """
+        self.cursor.execute(sqlreq, (info, working_room))
+
+    def toggle_room_setting(self, working_room):
+        sqlreq = "UPDATE room SET greeting_enabled = NOT greeting_enabled WHERE room_dbid = %s;"
+        self.cursor.execute(sqlreq, (working_room,))

@@ -52,20 +52,24 @@ class Command(object):
                 text = "Try `admin rules` to change the rules, `admin greeting` to change the greeting, `admin toggle greeting` to turn the greeting on or off, and `admin toggle listed` to be listed in the bot menu."
             topic = self.args[0]
             if topic == "rules":
-                field = "room_rules"
+                working_room = self.room.room_id
                 info = " ".join(self.args)
-                await save_room_data(self, field, info, self.room.room_id)
+                self.store.update_room_rules(info, working_room)
+                text = "Success."
+                await send_text_to_room(self.client, self.room.room_id, text)
             elif topic == "greeting":
-                field = room_greeting
+                working_room = self.room.room_id
                 info = " ".join(self.args)
-                await save_room_data(self, field, info, self.room.room_id)
+                self.store.update_room_greet(info, working_room)
+                text = "Success."
+                await send_text_to_room(self.client, self.room.room_id, text)
             elif topic == "toggle":
+                working_room = self.room.room_id
                 toggled = self.args[1]
                 if toggled == "greeting":
-                    field = "greeting_enabled"
-                    await toggle_room_setting(self, field, self.room.room_id)
-                else:
-                    text = "`Ye cannot toggle ye flaske`"
+                    working_room = self.room.room_id
+                    self.store.toggle_room_setting(working_room)
+                    text = "okay"
                     await send_text_to_room(self.client, self.room.room_id, text)
             else:
                 text = "`Ye cannot adminne ye flaske`"
