@@ -216,7 +216,8 @@ class Storage(object):
         sqlreq = "SELECT * FROM room WHERE room_dbid = %s;"
         self.cursor.execute(sqlreq, (working_room,))
         record = self.cursor.fetchall()[0]
-      
+        logger.info(f"{record}")
+
         if field == "room_greeting":
             return record[2]
         elif field == "room_rules":

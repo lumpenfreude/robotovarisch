@@ -2,10 +2,10 @@ import logging
 
 
 from robotovarisch.bot_commands import Command
-from robotovarisch.chat_functions import send_text_to_room
 from robotovarisch.message_responses import Message
 from robotovarisch.inv_routine import Invitation
-from robotovarisch.storage import Storage
+from robotovarisch.memberchange import Memberchange
+
 logger = logging.getLogger(__name__)
 
 
@@ -70,16 +70,12 @@ class Callbacks(object):
         if event.sender == self.client.user:
             return
         if event.membership == "join" and event.prev_membership != "join":
-            working_room = event.membership.room_id
-            await self._welcome()
+            working_room = room.room_id
+            memberchange = Memberchange(self.client, self.store, self.config, event.content, room, event, working_room)
+            await memberchange.process(working_room)
 
     async def invite(self, room, event):
         logger.info(f"Invited to {room.room_id}, creating database entries.")
         invitation = Invitation(self.client, self.store, self.config, event.content, room, event)
         await invitation.process()
 
-    async def _welcome(self, working_room):
-        can_greet = self.store.load_room_data("greeting_enabled", working_room)
-        if can_greet is True:
-            hello = self.store.load_room_data("room_greeting", working_room)
-            await send_text_to_room(self.client, working_room, hello)
