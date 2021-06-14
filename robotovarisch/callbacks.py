@@ -1,10 +1,11 @@
 import logging
 
-
+from nio import PowerLevels
 from robotovarisch.bot_commands import Command
 from robotovarisch.message_responses import Message
 from robotovarisch.inv_routine import Invitation
 from robotovarisch.memberchange import Memberchange
+from robotovarisch.admin import Admin
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +24,8 @@ class Callbacks(object):
         self.store = store
         self.config = config
         self.command_prefix = config.command_prefix
+        self.admin_prefix = config.admin_prefix
+        self.pl = PowerLevels
 
     async def message(self, room, event):
         """Callback for when a message event is received
@@ -40,18 +43,19 @@ class Callbacks(object):
         if event.sender == self.client.user:
             return
 
-        logger.debug(
+        logger.info(
             f"Bot message received for room {room.display_name} | "
             f"{room.user_name(event.sender)}: {msg}"
         )
 
         # Process as message if in a public room without command prefix
         has_command_prefix = msg.startswith(self.command_prefix)
+        has_admin_prefix = msg.startswith(self.admin_prefix)
         # room.is_group is often a DM, but not always.
         # room.is_group does not allow room aliases
         # room.member_count > 2 ... we assume a public room
         # room.member_count <= 2 ... we assume a DM
-        if not has_command_prefix and room.member_count > 2:
+        if not has_command_prefix and not has_admin_prefix and room.member_count > 2:
             # General message listener
             message = Message(self.client, self.store, self.config, msg, room, event)
             await message.process()
@@ -62,9 +66,18 @@ class Callbacks(object):
         if has_command_prefix:
             # Remove the command prefix
             msg = msg[len(self.command_prefix) :]
+            command = Command(self.client, self.store, self.config, msg, room, event)
+            await command.process()
+            return
 
-        command = Command(self.client, self.store, self.config, msg, room, event)
-        await command.process()
+        if has_admin_prefix:
+            sender_id = str(event.sender)
+            power = await self.pl.can_user_ban(self.pl, sender_id)
+            if power >= 50:
+                msg = msg[len(self.command_prefix) :]
+                admin = Admin(self.client, self.store, self.config, msg, room, event)
+                await admin.process()
+                return
 
     async def roommember(self, room, event):
         if event.sender == self.client.user:

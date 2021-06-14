@@ -1,7 +1,8 @@
 import logging
+import re
 
-from robotovarisch.chat_functions import send_text_to_room, change_avatar, change_displayname
-from robotovarisch.storage import Storage 
+from robotovarisch.chat_functions import send_text_to_room
+from robotovarisch.storage import Storage
 logger = logging.getLogger(__name__)
 
 
@@ -14,6 +15,7 @@ class Command(object):
         self.room = room
         self.event = event
         self.args = self.command.split()[1:]
+        self.pl = PowerLevels
 
     async def process(self):
         if self.command.startswith("echo"):
@@ -45,39 +47,6 @@ class Command(object):
                 await change_avatar(self.client, mxid)
             else:
                 await send_text_to_room(self.client, self.room.room_id, "that's not an mxc url")
-    
-    async def _admin_stuff(self):
-        if self.event.sender == "@elen:nopasaran.gq":
-            if not self.args:
-                text = "Try `admin rules` to change the rules, `admin greeting` to change the greeting, `admin toggle greeting` to turn the greeting on or off, and `admin toggle listed` to be listed in the bot menu."
-            else:
-                topic = self.args[0]
-                if topic == "rules":
-                    working_room = self.room.room_id
-                    info = " ".join(self.args).split(" ", 1)[1]
-                    self.store.update_room_rules(info, working_room)
-                    text = "Success."
-                    await send_text_to_room(self.client, self.room.room_id, text)
-                elif topic == "greeting":
-                    working_room = self.room.room_id
-                    info = " ".join(self.args).split(" ", 1)[1]
-                    self.store.update_room_greet(info, working_room)
-                    text = "Success."
-                    await send_text_to_room(self.client, self.room.room_id, text)
-                elif topic == "toggle":
-                    working_room = self.room.room_id
-                    toggled = self.args[1]
-                    if toggled == "greeting":
-                        working_room = self.room.room_id
-                        self.store.toggle_room_setting(working_room)
-                        text = "okay"
-                        await send_text_to_room(self.client, self.room.room_id, text)
-                    else:
-                        text = "`Ye cannot toggle ye flaske`"
-                        await send_text_to_room(self.client, self.room.room_id, text)
-                else:
-                    text = "`Ye cannot adminne ye flaske`"
-                    await send_text_to_room(self.client, self.room.room_id, text)
 
     async def _get_rules(self):
         rules = self.store.load_room_data("room_rules", self.room.room_id)
@@ -99,7 +68,7 @@ class Command(object):
     async def _echo(self):
         response = " ".join(self.args)
         await send_text_to_room(self.client, self.room.room_id, response)
-    
+
     async def _unknown_command(self):
         await send_text_to_room(
             self.client,
@@ -123,4 +92,3 @@ class Command(object):
         else:
             text = "Unknown help topic!"
         await send_text_to_room(self.client, self.room.room_id, text)
-
