@@ -1,6 +1,7 @@
 import logging
 
-from nio import PowerLevels
+from functools import reduce
+from nio.rooms import MatrixUser
 from robotovarisch.bot_commands import Command
 from robotovarisch.message_responses import Message
 from robotovarisch.inv_routine import Invitation
@@ -25,17 +26,17 @@ class Callbacks(object):
         self.config = config
         self.command_prefix = config.command_prefix
         self.admin_prefix = config.admin_prefix
-        self.pl = PowerLevels
+        self.user = MatrixUser
 
     async def message(self, room, event):
-        """Callback for when a message event is received
+        def parse_data(roomid):
+             for key, value in roomid.items():
+                 if isinstance(value, dict):
+                     for pair in parse_data(value):
+                         yield (key, *pair)
+                 else:
+                     yield (key, value)
 
-        Args:
-            room (nio.rooms.MatrixRoom): The room the event came from
-
-            event (nio.events.room_events.RoomMessageText): The event defining the message
-
-        """
         # Extract the message text
         msg = event.body
 
@@ -71,13 +72,28 @@ class Callbacks(object):
             return
 
         if has_admin_prefix:
-            sender_id = str(event.sender)
-            power = await self.pl.can_user_ban(self.pl, sender_id)
-            if power >= 50:
-                msg = msg[len(self.command_prefix) :]
-                admin = Admin(self.client, self.store, self.config, msg, room, event)
-                await admin.process()
-                return
+            msg = msg[len(self.comnd_prefix) :]
+            roomstate = await self.client.room_get_state(room.room_id)
+            for sublist in roomstate.events:
+                if sublist['type'] == 'm.room.power_levels':
+                    power_users = sublist['content']['users']
+                    if power_users[event.sender]:
+                        if power_users[event.sender] == '50':
+                            userlevel = "mod"
+                            admin = Admin(self.client, self.store, self.config, msg, room, event, userlevel)
+                            await admin.process()
+                            return
+                        if power_users[event.sender] == '100':
+                            userlevel = "admin"
+                            admin   = Admin(self.client, self.store, self.config, msg, room, event, userlevel)
+                            await admin.process()
+                            return
+                        else:
+                            return
+
+            
+            #await admin.process()
+            return
 
     async def roommember(self, room, event):
         if event.sender == self.client.user:

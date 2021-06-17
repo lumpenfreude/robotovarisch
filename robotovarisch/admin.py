@@ -1,6 +1,5 @@
 import logging
 
-from nio import PowerLevels
 from robotovarisch.chat_functions import send_text_to_room, change_avatar, change_displayname
 from robotovarisch.storage import Storage
 logger = logging.getLogger(__name__)
@@ -14,7 +13,6 @@ class Admin(object):
         self.room = room
         self.event = event
         self.args = self.admin.split()[1:]
-        self.pl = PowerLevels
 
     async def process(self):
         if self.args.startswith == "test":
