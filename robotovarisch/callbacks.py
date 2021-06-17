@@ -72,27 +72,18 @@ class Callbacks(object):
             return
 
         if has_admin_prefix:
-            msg = msg[len(self.comnd_prefix) :]
+            msg = msg[len(self.admin_prefix) :]
             roomstate = await self.client.room_get_state(room.room_id)
             for sublist in roomstate.events:
                 if sublist['type'] == 'm.room.power_levels':
                     power_users = sublist['content']['users']
-                    if power_users[event.sender]:
-                        if power_users[event.sender] == '50':
-                            userlevel = "mod"
-                            admin = Admin(self.client, self.store, self.config, msg, room, event, userlevel)
-                            await admin.process()
-                            return
-                        if power_users[event.sender] == '100':
-                            userlevel = "admin"
-                            admin   = Admin(self.client, self.store, self.config, msg, room, event, userlevel)
-                            await admin.process()
-                            return
-                        else:
-                            return
-
-            
-            #await admin.process()
+                    if power_users[event.sender] == '50' or '100':
+                        userlevel = power_users[event.sender]
+                        admin = Admin(self.client, self.store, self.config, msg, room, event, userlevel)
+                        await admin.process()
+                        return
+                    else:
+                        return
             return
 
     async def roommember(self, room, event):

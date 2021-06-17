@@ -215,15 +215,19 @@ class Storage(object):
         record = []
         sqlreq = "SELECT * FROM room WHERE room_dbid = %s;"
         self.cursor.execute(sqlreq, (working_room,))
-        record = self.cursor.fetchall()[0]
-        logger.info(f"{record}")
-
-        if field == "room_greeting":
-            return record[2]
-        elif field == "room_rules":
-            return record[3]
-        elif field == "greeting_enabled":
-            return record[4]
+        record = self.cursor.fetchall()
+        logger.info(f"{working_room}{record}")
+        if record[0]:
+            record = record[0]
+            if field == "room_greeting":
+                return record[2]
+            elif field == "room_rules":
+                return record[3]
+            elif field == "greeting_enabled":
+                return record[4]
+        else:
+            info = "ERROR ERROROH FJUYCKIF DATABSE SHIT NOOOOO"
+            return info
 
     def update_room_greet(self, info, working_room):
         sqlreq = """

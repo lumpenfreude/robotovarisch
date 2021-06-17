@@ -15,7 +15,6 @@ class Command(object):
         self.room = room
         self.event = event
         self.args = self.command.split()[1:]
-        self.pl = PowerLevels
 
     async def process(self):
         if self.command.startswith("echo"):
